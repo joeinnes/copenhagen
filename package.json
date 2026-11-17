@@ -10,9 +10,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "artifact": "npm run build && node scripts/artifact.mjs"
+    "artifact": "npm run build && node scripts/artifact.mjs",
+    "test:e2e": "playwright test --trace off"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "typescript": "5.8.3",
     "vite": "6.3.5",
     "vite-plugin-singlefile": "2.2.0",
