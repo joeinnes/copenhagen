@@ -2,7 +2,7 @@
 
 A contact centre sizing simulator for solution engineers. Enter the volumes you expect and the service levels you're selling, and it works out how many agents you need, builds the shift rota, and plays out a day on an isometric floor with a live wallboard.
 
-It's a single self-contained page: open `index.html` in a browser. No build step, no server, no dependencies beyond Google Fonts.
+It builds to a single self-contained HTML file (scripts, styles and the simulation worker all inlined). There's no server: everything runs in the browser, and the only external dependency is Google Fonts.
 
 ## What it models
 
@@ -22,6 +22,25 @@ It's a single self-contained page: open `index.html` in a browser. No build step
 - **Share link:** the whole scenario is encoded into the page's URL fragment.
 
 Settings and saved scenarios live in the browser's local storage.
+
+## Development
+
+```bash
+npm install
+npm run dev        # local dev server
+npm test           # model unit and regression tests
+npm run build      # type-check, then build dist/index.html
+npm run artifact   # also write dist/artifact.html, the fragment published as the claude.ai artifact
+```
+
+Every push to `main` runs the tests and deploys the build to GitHub Pages (`.github/workflows/pages.yml`).
+
+### Layout
+
+- `src/model/`: the modelling, as typed, pure functions of a scenario (no DOM): Erlang A/C, demand and requirements, shift optimisation, day evaluation, sizing, Monte Carlo and the contract-confidence search.
+- `src/worker.ts` and `src/ui/sim.ts`: the confidence search, the other-targets grid and the week/month simulations run in a Web Worker, falling back to the main thread if workers aren't available.
+- `src/ui/app.js`: the page, the isometric floor, the wallboard and the reports. Still plain JavaScript; it calls the model through thin wrappers bound to the current scenario.
+- `tests/`: unit tests for the maths, plus regression tests that pin the model to numbers recorded from the original single-file build (`tests/fixtures/baseline.json`).
 
 ## Why Copenhagen?
 

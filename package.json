@@ -1,0 +1,21 @@
+{
+  "name": "copenhagen",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Contact centre sizing simulator: Erlang A/C, shift optimisation, SLA risk and a live isometric floor",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "artifact": "npm run build && node scripts/artifact.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3",
+    "vite": "6.3.5",
+    "vite-plugin-singlefile": "2.2.0",
+    "vitest": "3.2.4"
+  }
+}
