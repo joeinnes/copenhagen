@@ -642,14 +642,17 @@ const DEFAULT={
   mode:'blended', hc:{}, shrink:20, spare:true, abTarget:8, slBasis:'offered', shortAb:5, model:'A', name:'Untitled scenario', autoSize:true, alDays:24, sickDays:5, minOn:true, minOnSeat:2, minPeople:3, ptOn:false, ptHours:4, ptShare:30, shared:false, clients:3, confOn:true, conf:99, confPeriod:'month', confMode:'misses', contractMonths:84, missesAllowed:1, cleanChance:90
 };
 let S;
-try{const j=JSON.parse(localStorage.getItem('erlangfloor.v2')||'null');S=j&&j.ch&&j.langs?Object.assign(structuredClone(DEFAULT),j):structuredClone(DEFAULT)}catch(e){S=structuredClone(DEFAULT)}
+// One-off move from the old Erlang Floor keys: copy anything saved there to the Copenhagen keys, then remove the old ones.
+try{for(const k of ['v2','scenarios','splash']){const o='erlangfloor.'+k,n='copenhagen.'+k,v=localStorage.getItem(o);
+  if(v!=null){if(localStorage.getItem(n)==null)localStorage.setItem(n,v);localStorage.removeItem(o)}}}catch(e){}
+try{const j=JSON.parse(localStorage.getItem('copenhagen.v2')||'null');S=j&&j.ch&&j.langs?Object.assign(structuredClone(DEFAULT),j):structuredClone(DEFAULT)}catch(e){S=structuredClone(DEFAULT)}
 // repair settings saved or shared while the hours bug was live (NaN was stored as null)
 function sanitise(){if(S.ch&&!S.ch.ticket)S.ch.ticket=structuredClone(DEFAULT.ch.ticket);if(!Number.isFinite(S.openFrom))S.openFrom=8;if(!Number.isFinite(S.openTo))S.openTo=20;
   S.openFrom=clamp(Math.round(S.openFrom),0,23);S.openTo=clamp(Math.round(S.openTo),0,24);if(S.openTo%24===S.openFrom)S.openTo=(S.openFrom+1)%24||24}
 if(S.minOn==null){S.minOn=true;S.minOnSeat=2;S.minPeople=3}
 if(S.confMode==null){S.confOn=true;S.confMode='misses';S.contractMonths=84;S.missesAllowed=1;S.cleanChance=90;S.conf=99;S.confPeriod='month'}
 sanitise();
-function save(){try{localStorage.setItem('erlangfloor.v2',JSON.stringify(S))}catch(e){}}
+function save(){try{localStorage.setItem('copenhagen.v2',JSON.stringify(S))}catch(e){}}
 
 /* ============ Erlang A ============ */
 // M/M/n+M. Rates per second. Returns service level (answered within T over offered), abandon prob, P(wait), mean queue length, mean wait, occupancy.
@@ -1852,8 +1855,8 @@ function syncScenarioBar(){
   $('#scSave').textContent=SC.curId?(scDirty()?'Save changes':'Saved'):'Save';
   $('#scSave').disabled=!!SC.curId&&!scDirty();
 }
-function localList(){try{return JSON.parse(localStorage.getItem('erlangfloor.scenarios')||'[]')}catch(e){return []}}
-function localWrite(l){try{localStorage.setItem('erlangfloor.scenarios',JSON.stringify(l));return true}catch(e){return false}}
+function localList(){try{return JSON.parse(localStorage.getItem('copenhagen.scenarios')||'[]')}catch(e){return []}}
+function localWrite(l){try{localStorage.setItem('copenhagen.scenarios',JSON.stringify(l));return true}catch(e){return false}}
 async function encodeConfig(obj){
   const raw=new TextEncoder().encode(JSON.stringify(obj));let data=raw,z='r';
   if(window.CompressionStream){try{data=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());z='z'}catch(e){data=raw;z='r'}}
@@ -1939,9 +1942,9 @@ function spTab(v){$$('#spTabs button').forEach(b=>b.setAttribute('aria-pressed',
 $$('#spTabs button').forEach(b=>b.onclick=()=>spTab(b.dataset.v));
 function openSplash(){$('#scrim').hidden=false;$('#splash').hidden=false;setTimeout(()=>$('#spGo').focus(),30)}
 function closeSplash(){if($('#splash').hidden)return;$('#splash').hidden=true;if(!openDrawer&&$('#shifts').hidden)$('#scrim').hidden=true;
-  if($('#spHide').checked){try{localStorage.setItem('erlangfloor.splash','off')}catch(e){}}}
+  if($('#spHide').checked){try{localStorage.setItem('copenhagen.splash','off')}catch(e){}}}
 $('#openHelp').onclick=openSplash;$('#spGo').onclick=closeSplash;$('#spClose').onclick=closeSplash;
-(()=>{let off=false;try{off=localStorage.getItem('erlangfloor.splash')==='off'}catch(e){}if(!off)openSplash()})();
+(()=>{let off=false;try{off=localStorage.getItem('copenhagen.splash')==='off'}catch(e){}if(!off)openSplash()})();
 
 /* ============ change pipeline ============ */
 let tChange=0,tMC=0,needRec=true,rerollAbsence=false;
