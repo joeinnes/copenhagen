@@ -11,10 +11,14 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "artifact": "npm run build && node scripts/artifact.mjs",
-    "test:e2e": "playwright test --trace off"
+    "test:e2e": "playwright test --trace off",
+    "check": "svelte-check --threshold error"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
+    "@sveltejs/vite-plugin-svelte": "5.1.0",
+    "svelte": "5.33.14",
+    "svelte-check": "4.2.1",
     "typescript": "5.8.3",
     "vite": "6.3.5",
     "vite-plugin-singlefile": "2.2.0",

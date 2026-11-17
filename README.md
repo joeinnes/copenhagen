@@ -29,18 +29,23 @@ Settings and saved scenarios live in the browser's local storage.
 npm install
 npm run dev        # local dev server
 npm test           # model unit and regression tests
+npm run test:e2e   # browser tests (Playwright) against the production build
+npm run check      # svelte-check
 npm run build      # type-check, then build dist/index.html
 npm run artifact   # also write dist/artifact.html, the fragment published as the claude.ai artifact
 ```
 
-Every push to `main` runs the tests and deploys the build to GitHub Pages (`.github/workflows/pages.yml`).
+Every push to `main` runs the unit and browser tests and deploys the build to GitHub Pages (`.github/workflows/pages.yml`).
 
 ### Layout
 
 - `src/model/`: the modelling, as typed, pure functions of a scenario (no DOM): Erlang A/C, demand and requirements, shift optimisation, day evaluation, sizing, Monte Carlo and the contract-confidence search.
 - `src/worker.ts` and `src/ui/sim.ts`: the confidence search, the other-targets grid and the week/month simulations run in a Web Worker, falling back to the main thread if workers aren't available.
-- `src/ui/app.js`: the page, the isometric floor, the wallboard and the reports. Still plain JavaScript; it calls the model through thin wrappers bound to the current scenario.
-- `tests/`: unit tests for the maths, plus regression tests that pin the model to numbers recorded from the original single-file build (`tests/fixtures/baseline.json`).
+- `src/ui/engine.svelte.js`: the page's state with no markup: the scenario, the recalculation pipeline, the live day and clock, month to date and saved scenarios. Components re-render when its counters in `ui` move (`inputs`, `rev`, `live`, `sizing`, `mc`, `tick`, `scen`).
+- `src/ui/floor.js`: the isometric floor, drawn on a canvas, with its agents, camera and click handling.
+- `src/ui/charts.js`: pure SVG chart builders (data in, markup out).
+- `src/ui/components/`: Svelte 5 components, one per part of the page (top bar, sizing strip, wallboard, floor, reports, drawers, shift schedule, splash), plus small `Num`, `Check` and `Sel` inputs that bind to a scenario setting by path.
+- `tests/`: unit tests for the maths, regression tests that pin the model to numbers recorded from the original single-file build (`tests/fixtures/baseline.json`), and browser tests in `tests/e2e/`.
 
 ## Why Copenhagen?
 
