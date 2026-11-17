@@ -48,6 +48,7 @@ test.describe('wallboard', () => {
 
   test('major incident: start, wind down, cancel', async ({ page }) => {
     await open(page);
+    await settled(page);
     await setClock(page, 11 * 60);
     const btn = page.locator('#incBtn');
     await btn.click();

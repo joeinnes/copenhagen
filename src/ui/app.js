@@ -1085,7 +1085,8 @@ function startConf(){
     if(g!==CONF.gen)return;
     CONF.busy=false;CONF.p=r.p;CONF.f=r.f;REC=r.hc;
     for(const t of getTeams())if(S.autoSize||!S.hc[t.id])S.hc[t.id]={...(REC[t.id]||{wd:0,we:0})};
-    computePlans();doSimReset();evalLive();buildMTD();buildLayout();renderSetup();renderSizing();renderShifts();scheduleMC();save()});
+    // the roster changed, so restart the month, but keep the clock where the user left it
+    computePlans();{const t=simSec;doSimReset();simSec=t}evalLive();buildMTD();buildLayout();renderSetup();renderSizing();renderShifts();scheduleMC();save()});
 }
 function recompute(){
   freshCtx();
