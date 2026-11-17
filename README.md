@@ -1,4 +1,4 @@
-# Erlang Floor
+# Copenhagen
 
 A contact centre sizing simulator for solution engineers. Enter the volumes you expect and the service levels you're selling, and it works out how many agents you need, builds the shift rota, and plays out a day on an isometric floor with a live wallboard.
 
@@ -22,3 +22,7 @@ It's a single self-contained page: open `index.html` in a browser. No build step
 - **Share link:** the whole scenario is encoded into the page's URL fragment.
 
 Settings and saved scenarios live in the browser's local storage.
+
+## Why Copenhagen?
+
+In 1917, A.K. Erlang worked out the queueing maths this tool runs on while working for the Copenhagen Telephone Company, sizing its exchanges.

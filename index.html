@@ -1,4 +1,4 @@
-<title>Erlang Floor</title>
+<title>Copenhagen</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -274,7 +274,7 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <h1>Erlang<span>/</span>Floor</h1>
+      <h1>Copenhagen</h1>
       <p>Contact centre simulator · <span id="modelTag">Erlang A</span></p>
     </div>
     <div class="scen">
@@ -361,7 +361,7 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
   </div>
   <div class="seg" id="spTabs" role="tablist"><button role="tab" data-v="start" aria-pressed="true">Getting started</button><button role="tab" data-v="how" aria-pressed="false">How the numbers work</button></div>
   <div id="spStart">
-  <p class="sp-lede">Enter the volumes you expect and the service you're promising. Erlang Floor works out the headcount, builds the rota, and plays out a day on the floor so you can see whether it holds.</p>
+  <p class="sp-lede">Enter the volumes you expect and the service you're promising. Copenhagen works out the headcount, builds the rota, and plays out a day on the floor so you can see whether it holds.</p>
   <ol class="sp-steps">
     <li><b>Set demand and targets</b><span>Open <em>Demand &amp; targets</em>. Volumes, handle times and the daily curve are the givens. Service targets are what you're selling: tighten them and the headcount goes up.</span></li>
     <li><b>Read the answer</b><span>The strip under the top bar shows the FTE you need, after rest days (5 days in 7), annual leave and sickness. Further down, you'll find the split by team and the FTE for other call targets.</span></li>
@@ -382,6 +382,7 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
       <li><b>500 simulated weeks</b><span>The likelihood figures come from simulating the period 500 times: 500 days, weeks or months. In every run, each day's volume is drawn around the forecast using your forecast accuracy, with a shared element so a busy week tends to stay busy, and a random number of agents is off. The rota stays as planned. The likelihood is the share of runs that hit each target, and the monthly histogram shows the spread.</span></li>
       <li><b>The live floor</b><span>The floor and wallboard play out today's modelled numbers. Each morning, leave and sickness are rolled at random. What each agent is doing is drawn from the modelled occupancy, and queue lengths are drawn around the modelled averages.</span></li>
     </ol>
+    <p class="hint">Why Copenhagen? In 1917, A.K. Erlang worked out the queueing maths this tool runs on while working for the Copenhagen Telephone Company, sizing its exchanges.</p>
     <p class="hint">Assumptions: arrivals are random within each half hour, handle times and patience follow the usual exponential curves, routing is by language only, and spare language agents can help with English but not the other way round.</p>
   </div>
   <div class="sp-foot">
