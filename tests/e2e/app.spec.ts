@@ -212,6 +212,7 @@ test.describe('scenarios', () => {
     const hash = await page.evaluate(() => location.hash);
     const p2 = await context.newPage();
     await p2.goto('/' + hash);
+    await settled(p2);
     await expect(p2.locator('#splash')).toBeHidden();
     await expect(p2.locator('#live')).toBeInViewport();
     await expect(p2.locator('#scName')).toHaveValue('Acme bid');
@@ -220,9 +221,11 @@ test.describe('scenarios', () => {
 
   test('reset asks for a second click, then restores the defaults', async ({ page }) => {
     await open(page);
+    await settled(page);
     await page.locator('#openDemand').click();
     await page.locator('#vVol').fill('9999');
     await page.keyboard.press('Escape');
+    await settled(page);
     await page.locator('#scOpen').click();
     await page.locator('#scReset').click();
     await expect(page.locator('#scReset')).toHaveText('Confirm reset');
@@ -242,6 +245,8 @@ test.describe('scenarios', () => {
 });
 
 test.describe('floor', () => {
+  // tall enough that the whole floor is on screen next to the wallboard
+  test.use({ viewport: { width: 1400, height: 1300 } });
   test('clicking an agent shows their shift', async ({ page }) => {
     await open(page);
     await settled(page);
@@ -251,12 +256,26 @@ test.describe('floor', () => {
     const box = (await canvas.boundingBox())!;
     // try a grid of points until one lands on an agent
     let shown = false;
-    for (let y = 0.35; y < 0.9 && !shown; y += 0.05) for (let x = 0.25; x < 0.85 && !shown; x += 0.04) {
+    for (let y = 0.35; y < 0.85 && !shown; y += 0.06) for (let x = 0.25; x < 0.85 && !shown; x += 0.05) {
       await page.mouse.click(box.x + box.width * x, box.y + box.height * y);
       shown = await page.locator('#pop').isVisible();
     }
     expect(shown).toBe(true);
     await expect(page.locator('#pop')).toContainText(/team/);
+  });
+
+  test('the canvas stays the size of its container after edits', async ({ page }) => {
+    await open(page);
+    await settled(page);
+    for (const v of ['9000', '8400']) {
+      await page.locator('#openDemand').click();
+      await page.locator('#vVol').fill(v);
+      await page.keyboard.press('Escape');
+      await settled(page);
+    }
+    const { w, shown, vw } = await page.evaluate(() => { const c = document.querySelector('#cv') as HTMLCanvasElement; return { w: c.width / Math.min(2, devicePixelRatio || 1), shown: c.clientWidth, vw: innerWidth }; });
+    expect(shown).toBeLessThanOrEqual(vw);
+    expect(Math.abs(w - shown)).toBeLessThanOrEqual(2);
   });
 
   test('zoom buttons zoom and Fit resets', async ({ page }) => {

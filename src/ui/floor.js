@@ -97,7 +97,8 @@ export function updateAgents(dt){
 /* ============ floor drawing ============ */
 let cv=null,floorEl=null,ctxMain=null,ctx=null,bgKey='',layoutVer=0,onScreen=true;const bgCv=document.createElement('canvas');
 let CAM={z:1,x:0,y:0};
-function resize(){if(!cv)return;const w=cv.clientWidth||floorEl.clientWidth,dpr=Math.min(2,window.devicePixelRatio||1);
+// Size the canvas from its container, never from itself: a canvas's pixel size feeds back into an auto-sized layout.
+function resize(){if(!cv)return;const w=floorEl.clientWidth||cv.clientWidth,dpr=Math.min(2,window.devicePixelRatio||1);
   cv.width=Math.round(w*dpr);cv.height=Math.round(w*L.LH/L.LW*dpr);cv.style.height=(w*L.LH/L.LW)+'px';clampCam()}
 function clampCam(){CAM.z=clamp(CAM.z,1,5);const vw=L.LW/CAM.z,vh=L.LH/CAM.z;CAM.x=clamp(CAM.x,0,L.LW-vw);CAM.y=clamp(CAM.y,0,L.LH-vh);
   ui.zoomed=CAM.z>1.01;if(cv){cv.style.touchAction=CAM.z>1.01?'none':'pan-y';cv.style.cursor=CAM.z>1.01?'grab':'pointer'}}
