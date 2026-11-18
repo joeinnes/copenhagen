@@ -112,6 +112,12 @@ export function confAimTxt(){const N=Math.round(+S.contractMonths||84),k=+S.miss
   if(S.confMode==='clean')return `${S.cleanChance}% chance of no missed month in ${N}`;
   return `${S.conf}% of ${S.confPeriod==='week'?'weeks':'months'}`}
 export const pctAim=()=>(confTarget()*100).toFixed(confTarget()>0.999?2:1)+'%';
+/** What the headline headcount is sized to, in one sentence: the measurement period for targets, and the risk aim. */
+export function sizingBasis(){
+  if(!S.confOn)return 'Sized on the forecast so every target is met over the whole of the busiest weekday and the busiest weekend day. Individual half hours can fall short.';
+  const u=confPeriodNow()==='week'?'week':'month';
+  return `Sized so every target, measured over a whole ${u}, is met in at least ${pctAim()} of 500 simulated ${u}s (${confAimTxt()}), with volume and absence varying. Individual half hours and days can fall short.`;
+}
 function startConf(){
   const g=++CONF.gen;CONF.busy=true;CONF.p=null;ui.sizing++;
   sim({type:'conf',S,rec0:REC0,minh:MINH}).then(r=>{

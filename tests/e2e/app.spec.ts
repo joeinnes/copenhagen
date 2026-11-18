@@ -9,6 +9,7 @@ test.describe('first load', () => {
     await expect(page.locator('#sizing')).toContainText('99.0%');
     await expect(page.locator('#sizing')).toContainText('at most 1 missed month in 84');
     await expect(page.locator('#sizing')).toContainText('Matched to the recommendation');
+    await expect(page.locator('#headcount')).toContainText('measured over a whole month, is met in at least 98.8% of 500 simulated months');
     expect(errors).toEqual([]);
   });
 

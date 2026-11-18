@@ -1,6 +1,6 @@
 <script>
   // "How many agents do I need?": recommended headcount by team, and FTE for other call targets.
-  import { ui, S, REC, CONF, TRADE, sizing, clientShare, ghostK, attend, confAimTxt, ptLen } from '../engine.svelte.js';
+  import { ui, S, REC, CONF, TRADE, sizing, clientShare, ghostK, attend, confAimTxt, sizingBasis, ptLen } from '../engine.svelte.js';
   import { pct, fmtN } from '../format.js';
   import Section from './Section.svelte';
   import SizingStrip from './SizingStrip.svelte';
@@ -22,7 +22,7 @@
       }) })) };
     }
     const longH = S.weLong ? S.weLongHours || 12 : 0;
-    return { need, basis, shared, voiceOn: E.voice.on, trade, confOn: S.confOn, ptOn: S.ptOn, longH, ptFte: (ptLen() / 2 / 8).toFixed(2).replace(/0$/, ''),
+    return { need, basis, basisTxt: sizingBasis(), shared, voiceOn: E.voice.on, trade, confOn: S.confOn, ptOn: S.ptOn, longH, ptFte: (ptLen() / 2 / 8).toFixed(2).replace(/0$/, ''),
       foot: `Sized on the busiest weekday and the busiest weekend day, each with its own optimised rota of ${longH ? `4h on, 1h lunch, 4h on (weekdays) and ${longH}-hour shifts (weekends)` : '4h on, 1h lunch, 4h on'}. On-shift numbers allow ${S.shrink}% shrinkage. Each agent takes ${S.alDays} days' annual leave and ${S.sickDays} sick days a year, so on any day each rostered agent has a ${pct(1 - attend(), 1)} chance of being away; rosters are sized up to cover that, and the ~ figures show who is typically in. ${longH ? `FTE is paid hours ÷ 40: a weekday shift pays 8 hours and a weekend shift ${longH}.` : 'FTE is agent-days ÷ 5.'} Each language team is sized on its own; spare language agents helping with English is a bonus on top.` };
   });
 </script>
@@ -34,7 +34,7 @@
     <td>{fmtN(r.days)}</td><td><b>{r.contract}</b></td></tr>
 {/snippet}
 
-<Section id="headcount" n="3" name="Headcount" title="How many agents do I need?" sub="The smallest roster that hits every target in the brief, after rest days, leave and sickness.">
+<Section id="headcount" n="3" name="Headcount" title="How many agents do I need?" sub={d.basisTxt}>
   <SizingStrip />
   <div class="sz-grid">
     <div class="tbl" id="szTeams">
