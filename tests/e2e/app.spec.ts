@@ -196,6 +196,7 @@ test.describe('report and schedule', () => {
     await expect(page.locator('#shGantt svg')).toBeVisible();
     await expect(page.locator('#shSub')).toContainText('Night starts (23:00–05:30) are avoided');
     await expect(page.locator('#shFacts')).toContainText('night starts');
+    await expect(page.locator('#shFacts')).toContainText('of the half-hourly requirement covered');
   });
 });
 

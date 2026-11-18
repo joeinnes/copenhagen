@@ -24,7 +24,7 @@
       : 'Night starts (23:00–05:30) are avoided and 08:00–10:00, 13:00–15:00 and 21:00–22:30 preferred, wherever the same headcount still hits every target.';
     return { teams, sel, groups, tot, openDays: S.openDays.slice(), shrink: S.shrink, prefNote, night: groups.filter((x) => isNightStart(x.s)).reduce((a, x) => a + x.n, 0),
       sub: `The optimal start times for ${DOW[day]}'s forecast with ${tot} agents on shift. ${S.weLong && day >= 5 ? `Full-time agents work ${S.weLongHours || 12}-hour (L) shifts today, with breaks covered by shrinkage` : 'Full-time shifts are 4 hours on, a 1-hour lunch, then 4 hours on'}${S.ptOn ? `; part-time (PT) shifts are ${ptLen() / 2} hours with no lunch` : ''}.`,
-      range: groups.length ? hhmm(Math.min(...starts)) + ' – ' + hhmm(Math.max(...starts)) : '–', need: onH ? pct(reqH / onH, 0) : '–', under: under.toFixed(1),
+      range: groups.length ? hhmm(Math.min(...starts)) + ' – ' + hhmm(Math.max(...starts)) : '–', cover: reqH ? pct(onH / reqH, 0) : '–', under: under.toFixed(1), coverLow: reqH > 0 && onH < reqH,
       gantt: shiftGantt({ groups, multiTeam: sel.length > 1, shS, shKind, shSegs, shLabel, shDesc }), cover: shiftCover(req, on) };
   });
 
@@ -56,15 +56,16 @@
       <div class="fact"><b>{v.tot}</b><span>shifts</span></div>
       <div class="fact"><b>{v.range}</b><span>first and last start</span></div>
       <div class="fact"><b>{v.night}</b><span>night starts (23:00–05:30)</span></div>
-      <div class="fact"><b>{v.need}</b><span>of on-seat hours needed for target</span></div>
-      <div class="fact"><b>{v.under}h</b><span>short of requirement across the day</span></div>
+      <div class="fact"><b>{v.cover}</b><span>of the half-hourly requirement covered</span></div>
+      <div class="fact"><b>{v.under}h</b><span>agent-hours below the requirement</span></div>
     </div>
     <div class="chart" id="shGantt">
       <h3>Shifts by start time</h3><p class="sub"><span style="color:var(--accent)">■</span> On shift, darker where more agents start together &nbsp; <span style="color:var(--muted)">■</span> Lunch. Hover a row for the team split. {v.groups.length > 14 ? `${v.groups.length} start times; scroll for more.` : ''}</p>
       <div class="gantt-scroll">{@html v.gantt}</div>
     </div>
     <div class="chart" id="shCov">
-      <h3>Cover against requirement</h3><p class="sub"><span style="color:var(--accent)">■</span> Agents on seat &nbsp; <span style="font-family:var(--f-mono)">- -</span> Needed for target, after {v.shrink}% shrinkage &nbsp; <span style="color:var(--bad)">■</span> Shortfall</p>
+      <h3>Cover against requirement</h3>
+      <p class="hint">The requirement is enough agents to hit the target in every half hour on its own. Targets are measured across the whole day, so a rota can dip below it at the peaks and make it up in quieter half hours: that's usually cheaper, and the SLA risk step shows whether it still holds.</p><p class="sub"><span style="color:var(--accent)">■</span> Agents on seat &nbsp; <span style="font-family:var(--f-mono)">- -</span> Needed for target, after {v.shrink}% shrinkage &nbsp; <span style="color:var(--bad)">■</span> Shortfall</p>
       <div style="overflow-x:auto">{@html v.cover}</div>
     </div>
   </div>
