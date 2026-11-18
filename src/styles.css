@@ -309,7 +309,7 @@ details.method .foot{margin-top:6px}
 .bcard .btn{justify-self:start}
 
 /* step 4: rota (was a dialog) */
-.rota{display:grid;gap:14px}
+.rota{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 .rota .seg{flex-wrap:wrap}
 
 /* step 5: live floor */
@@ -323,7 +323,7 @@ details.method .foot{margin-top:6px}
 .gantt-scroll{overflow:auto;max-height:440px;overscroll-behavior:contain}
 @media (max-width:600px){.scen input{flex:1 1 100%}.scen .help{margin-left:auto}}
 /* live floor: on wide screens the wallboard sits beside the floor so the room is in the first screenful; stacked (board first) below that */
-.stage{display:grid;gap:14px;grid-template-areas:"board" "floor"}
+.stage{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;grid-template-areas:"board" "floor"}
 .stage>.wallboard{grid-area:board;min-width:0}
 .stage>.floor-wrap{grid-area:floor;min-width:0}
 @media (min-width:1180px){
@@ -340,3 +340,15 @@ details.method .foot{margin-top:6px}
 .starts-strip .sc.blocked{background:repeating-linear-gradient(135deg,var(--bad) 0 3px,var(--bad-soft) 3px 6px)}
 .starts-strip .sc:hover{outline:1px solid var(--ink-2);outline-offset:-1px}
 .starts .bars-x{padding-inline:4px}
+/* wallboard: nothing reflows as numbers change. Each cell has fixed sub-lines that cut off rather than wrap, the call counts
+   sit in four set columns, and agent states in slots sized by the board's width only. The ticker's text never sizes its box. */
+.wb-sub{display:grid;min-width:0}
+.wb-sub>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.wb-sub b{font-weight:inherit}
+.wb-cell>.wb-sub{min-height:calc(2 * 1.35em)}
+.wb-trio{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 10px}
+.wb-trio>div{min-width:0}
+.wb-trio .wb-sub{min-height:0}
+.wb-agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:2px 10px}
+.wb-agents span{white-space:nowrap;min-width:0}
+.ticker{contain:inline-size;min-width:0}

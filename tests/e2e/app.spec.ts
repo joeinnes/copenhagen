@@ -43,7 +43,17 @@ test.describe('wallboard', () => {
 
   test('shows month to date, starting on day 1', async ({ page }) => {
     await open(page);
-    await expect(wallboardCell(page, 'Calls SL month to date')).toContainText('Day 1 of 30');
+    await expect(wallboardCell(page, /Interval/)).toContainText('Day 1 of 30');
+    await expect(wallboardCell(page, 'Calls SL month')).toContainText('offered');
+  });
+
+  test('cells keep their size as the numbers change', async ({ page }) => {
+    await open(page);
+    await settled(page);
+    await page.locator('#speedSeg button[data-v="900"]').click();
+    const sizes = () => page.locator('#wb .wb-cell').evaluateAll((els) => els.map((e) => `${Math.round(e.getBoundingClientRect().width)}x${Math.round(e.getBoundingClientRect().height)}`).join(' '));
+    const first = await sizes();
+    for (let k = 0; k < 6; k++) { await page.waitForTimeout(500); expect(await sizes()).toBe(first); }
   });
 
   test('major incident: start, wind down, cancel', async ({ page }) => {
@@ -197,6 +207,8 @@ test.describe('report and schedule', () => {
     await expect(page.locator('#shSub')).toContainText('Night starts (23:00–05:30) are avoided');
     await expect(page.locator('#shFacts')).toContainText('night starts');
     await expect(page.locator('#shFacts')).toContainText('of the half-hourly requirement covered');
+    await expect(page.locator('#shFacts')).not.toContainText('<svg');
+    await expect(page.locator('#shFacts .fact b').filter({ hasText: '%' })).toHaveText(/^\d+%$/);
   });
 });
 

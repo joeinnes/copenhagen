@@ -67,7 +67,7 @@ function segs(a, b) { const out = [], len = b - a; a = ((a % 1440) + 1440) % 144
 /** Shift schedule: one row per start time, bar per working block. */
 export function shiftGantt({ groups, multiTeam, shS, shKind, shSegs, shLabel, shDesc }) {
   const W = SH_W, pl = SH_PL, pr = SH_PR, top = 22, rh = 22, H = top + Math.max(1, groups.length) * rh + 6, x = (m) => pl + (W - pl - pr) * m / 1440, mxN = Math.max(1, ...groups.map((z) => z.n)); let g = '';
-  for (let h = 0; h <= 24; h += 2) g += `<line class="grid" x1="${x(h * 60)}" x2="${x(h * 60)}" y1="${top - 4}" y2="${H}"/><text class="ax" x="${x(h * 60)}" y="12" text-anchor="middle">${String(h % 24).padStart(2, '0')}:00</text>`;
+  for (let h = 0; h <= 24; h += 2) g += `<line class="grid" x1="${x(h * 60)}" x2="${x(h * 60)}" y1="${top - 4}" y2="${H}"/><text class="ax" x="${x(h * 60)}" y="12" text-anchor="${h === 24 ? 'end' : 'middle'}">${String(h % 24).padStart(2, '0')}:00</text>`;
   groups.forEach((o, r) => {
     const y = top + r * rh + 3, kind = shKind(o.s), bh = rh - 7, br = Object.entries(o.by).map(([k, v]) => `${k} ${v}`).join(', ');
     g += `<g><title>${shDesc(o.s)}: ${o.n} agent${o.n > 1 ? 's' : ''}${multiTeam ? ' (' + br + ')' : ''}</title>`;
@@ -86,7 +86,7 @@ export function shiftCover(req, on) {
   const W = SH_W, pl = SH_PL, pr = SH_PR, CH2 = 200, pb = 24, pt = 8, mx = Math.max(3, ...req, ...on) * 1.1, yy = (v) => pt + (CH2 - pt - pb) * (1 - v / mx), xx = (i) => pl + (W - pl - pr) * i / 48; let c = '';
   const step = mx > 40 ? 10 : mx > 16 ? 5 : 2;
   for (let v = 0; v <= mx; v += step) c += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${yy(v)}" y2="${yy(v)}"/><text class="ax" x="${pl - 6}" y="${yy(v) + 3.5}" text-anchor="end">${v}</text>`;
-  for (let h = 0; h <= 24; h += 2) c += `<text class="ax" x="${xx(h * 2)}" y="${CH2 - 6}" text-anchor="middle">${String(h % 24).padStart(2, '0')}:00</text>`;
+  for (let h = 0; h <= 24; h += 2) c += `<text class="ax" x="${xx(h * 2)}" y="${CH2 - 6}" text-anchor="${h === 24 ? 'end' : 'middle'}">${String(h % 24).padStart(2, '0')}:00</text>`;
   c += `<path d="${stepPath(on, xx, yy)}V${yy(0)}H${xx(0)}Z" fill="var(--accent)" opacity=".2"/><path d="${stepPath(on, xx, yy)}" fill="none" stroke="var(--accent)" stroke-width="2"/><path d="${stepPath(req, xx, yy)}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/>`;
   for (let i = 0; i < 48; i++) if (req[i] - on[i] > 0.5) c += `<rect x="${xx(i)}" y="${yy(req[i])}" width="${xx(1) - xx(0)}" height="${yy(on[i]) - yy(req[i])}" fill="var(--bad)" opacity=".3"/>`;
   return svgEl(W, CH2, c, 'min-width:640px');

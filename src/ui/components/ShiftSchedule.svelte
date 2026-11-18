@@ -24,7 +24,7 @@
       : 'Night starts (23:00–05:30) are avoided and 08:00–10:00, 13:00–15:00 and 21:00–22:30 preferred, wherever the same headcount still hits every target.';
     return { teams, sel, groups, tot, openDays: S.openDays.slice(), shrink: S.shrink, prefNote, night: groups.filter((x) => isNightStart(x.s)).reduce((a, x) => a + x.n, 0),
       sub: `The optimal start times for ${DOW[day]}'s forecast with ${tot} agents on shift. ${S.weLong && day >= 5 ? `Full-time agents work ${S.weLongHours || 12}-hour (L) shifts today, with breaks covered by shrinkage` : 'Full-time shifts are 4 hours on, a 1-hour lunch, then 4 hours on'}${S.ptOn ? `; part-time (PT) shifts are ${ptLen() / 2} hours with no lunch` : ''}.`,
-      range: groups.length ? hhmm(Math.min(...starts)) + ' – ' + hhmm(Math.max(...starts)) : '–', cover: reqH ? pct(onH / reqH, 0) : '–', under: under.toFixed(1), coverLow: reqH > 0 && onH < reqH,
+      range: groups.length ? hhmm(Math.min(...starts)) + ' – ' + hhmm(Math.max(...starts)) : '–', coverPct: reqH ? pct(onH / reqH, 0) : '–', under: under.toFixed(1), coverLow: reqH > 0 && onH < reqH,
       gantt: shiftGantt({ groups, multiTeam: sel.length > 1, shS, shKind, shSegs, shLabel, shDesc }), cover: shiftCover(req, on) };
   });
 
@@ -56,7 +56,7 @@
       <div class="fact"><b>{v.tot}</b><span>shifts</span></div>
       <div class="fact"><b>{v.range}</b><span>first and last start</span></div>
       <div class="fact"><b>{v.night}</b><span>night starts (23:00–05:30)</span></div>
-      <div class="fact"><b>{v.cover}</b><span>of the half-hourly requirement covered</span></div>
+      <div class="fact"><b>{v.coverPct}</b><span>of the half-hourly requirement covered</span></div>
       <div class="fact"><b>{v.under}h</b><span>agent-hours below the requirement</span></div>
     </div>
     <div class="chart" id="shGantt">
