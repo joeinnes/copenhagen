@@ -143,6 +143,18 @@ test.describe('flow', () => {
     await expect(page.locator('#brief')).toContainText('12-hour weekend shifts');
   });
 
+  test('blocking night starts removes them from the rota', async ({ page }) => {
+    await open(page);
+    await settled(page);
+    await page.locator('#openSetup').click();
+    await page.locator('#blockNights').click();
+    await expect(page.locator('#noStartSummary')).toContainText('No shift starts 23:00–06:00');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#brief')).toContainText('no starts in 7h of the day');
+    await settled(page);
+    await expect(page.locator('#shFacts .fact').filter({ hasText: 'night starts' }).locator('b')).toHaveText('0');
+  });
+
   test('the step bar shows the headcount and jumps to each step', async ({ page }) => {
     await open(page);
     await settled(page);

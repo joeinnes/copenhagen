@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  backlogRun, computePlans, computeRec, confTarget, coverage, defaults, erlang, erlangCore, getTeams, isNightStart, makeCtx, meetsTargets,
+  allowedStarts, backlogRun, computePlans, computeRec, confTarget, coverage, defaults, erlang, erlangCore, getTeams, isNightStart, makeCtx, meetsTargets,
   minAgents, searchConfidence, sizing, startPenalty,
 } from '../src/model';
 
@@ -155,4 +155,21 @@ describe('sociable start times', () => {
     expect(a.hc).toEqual(b.hc);
     expect(a.p!).toBeGreaterThanOrEqual(confTarget(on.S));
   }, 120_000);
+});
+
+describe('blocked start times', () => {
+  const NIGHT = [46, 47, ...Array(12).keys()];
+  const ctxWith = (noStart: number[]) => { const S = defaults(); S.noStart = noStart; return makeCtx(S); };
+  it('removes blocked half hours from the allowed starts, and ignores a rule that blocks everything', () => {
+    expect(allowedStarts(ctxWith(NIGHT))).toHaveLength(34);
+    expect(allowedStarts(ctxWith([...Array(48).keys()]))).toHaveLength(48);
+  });
+  it('no rota starts a shift in a blocked half hour', () => {
+    const ctx = ctxWith(NIGHT), plan = computePlans(ctx, computeRec(ctx).rec);
+    for (let d = 0; d < 7; d++) for (const t of getTeams(ctx)) for (const x of plan[d][t.id]) expect(NIGHT).not.toContain(x % 100);
+  });
+  it('is a hard rule: blocking the morning peak can only cost headcount', () => {
+    const free = makeCtx(defaults()), blocked = ctxWith([14, 15, 16, 17, 18, 19, 20, 21]); // 07:00–11:00
+    expect(sizing(blocked, computeRec(blocked).rec).tot.contract).toBeGreaterThanOrEqual(sizing(free, computeRec(free).rec).tot.contract);
+  });
 });

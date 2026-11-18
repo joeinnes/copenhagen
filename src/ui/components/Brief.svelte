@@ -22,6 +22,7 @@
     if (S.ptOn) shifts.push(`up to ${S.ptShare}% part-time (${S.ptHours}h)`);
     if (S.weLong) shifts.push(`${S.weLongHours || 12}-hour weekend shifts`);
     if (S.shiftPrefs !== false) shifts.push('sociable starts preferred');
+    if (S.noStart?.length && S.noStart.length < 48) shifts.push(`no starts in ${S.noStart.length / 2}h of the day`);
     return {
       demand: on.map((c) => ({ c, name: CHN[c], vol: `${fmtN(E[c].vol)} ${per[S.period]}`, sub: aht(c, E[c].aht) })),
       open: `${hours}, ${daysTxt(S.openDays)}`,

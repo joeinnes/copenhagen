@@ -52,6 +52,8 @@ export interface Config {
   weLongHours?: number;
   /** Prefer sociable shift start times when the rota can keep the same cover. */
   shiftPrefs?: boolean;
+  /** Half hours (0-47) when no shift may start. */
+  noStart?: number[];
   shared: boolean;
   clients: number;
   confOn: boolean;

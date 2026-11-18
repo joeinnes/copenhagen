@@ -45,8 +45,16 @@ export const isNightStart = (x: number) => startPenalty(shS(x)) === 3;
 /** Total start-time penalty of a plan (lower is more sociable). */
 export const planPenalty = (starts: number[]) => starts.reduce((a, x) => a + startPenalty(shS(x)), 0);
 
-/** Every shift may start on any half hour, running past midnight into the next day. */
-export const allowedStarts = () => [...Array(48).keys()];
+/**
+ * Half hours a shift may start in: any, running past midnight into the next day, except those the solution designer has
+ * blocked (S.noStart, half-hour indices 0-47). A hard rule: it applies to sizing too, so it can cost headcount. If every
+ * half hour is blocked, the rule is ignored.
+ */
+export function allowedStarts(ctx?: Ctx): number[] {
+  const all = [...Array(48).keys()], no = new Set(ctx?.S.noStart || []);
+  const ok = all.filter((s) => !no.has(s));
+  return ok.length ? ok : all;
+}
 
 /** Agents on seat and at lunch per half hour, for a set of shift codes (optionally skipping some agents). */
 export function coverage(ctx: Ctx, starts: number[], skip?: Set<number>) {

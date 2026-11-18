@@ -53,7 +53,7 @@ export const getTeams=()=>M.getTeams(C()), ghostK=()=>M.ghostK(C()), clientShare
 export const attend=()=>M.attend(C()), minSeat=()=>M.minSeat(C()), teamReq=(t,d)=>M.teamReq(C(),t,d);
 export const weekendOpen=()=>M.weekendOpen(C()), weekdayOpen=()=>M.weekdayOpen(C());
 export const shS=M.shS, shPT=M.shPT, shLong=M.shLong, shKind=M.shKind, ptLen=()=>M.ptLen(C()), shMins=x=>M.shMins(C(),x);
-const allowedStarts=M.allowedStarts, optimise=(req,types,fixed,al)=>M.optimise(C(),req,types,fixed,al);
+const allowedStarts=()=>M.allowedStarts(C()), optimise=(req,types,fixed,al)=>M.optimise(C(),req,types,fixed,al);
 export const coverage=(starts,skip)=>M.coverage(C(),starts,skip);
 const evalDay=(d,mult,sched,boost,att)=>M.evalDay(C(),d,mult,sched,boost,att), summarise=res=>M.summarise(C(),res);
 export const rosterSize=(id,d)=>M.rosterSize(C(),S.hc,id,d), deskCount=id=>M.deskCount(C(),S.hc,id);

@@ -46,7 +46,7 @@ const NIGHT_MOVES = [12, 13, 14, 45, 44, 43, 42];
  * no more than 5% (at least half an agent-hour), so the rota's odds over many simulated days barely move.
  */
 export function planDay(ctx: Ctx, team: Team, d: number, H: number): number[] {
-  const req = teamReq(ctx, team, d), al = allowedStarts(), base = optimise(ctx, req, H, null, al, d);
+  const req = teamReq(ctx, team, d), al = allowedStarts(ctx), base = optimise(ctx, req, H, null, al, d);
   if (ctx.plainPlans || ctx.S.shiftPrefs === false || !base.length || !planPenalty(base)) return base;
   const cov0 = coverage(ctx, base).on, cover0 = coverOK(ctx, team, d, cov0), meets0 = meetsTargets(ctx, team, d, cov0);
   const maxShort = shortfall(req, cov0) * 1.05 + 0.5;
@@ -64,6 +64,7 @@ export function planDay(ctx: Ctx, team: Team, d: number, H: number): number[] {
     if (!isNightStart(best[k])) continue;
     const kind = best[k] - shS(best[k]);
     for (const s of NIGHT_MOVES) {
+      if (!al.includes(s)) continue;
       const trial = best.slice(); trial[k] = kind + s;
       if (passes(trial)) { best = trial; break; }
     }
@@ -104,7 +105,7 @@ export function busiest(ctx: Ctx, team: Team, days: number[]): number | null {
 /** Smallest roster for a team on a day whose optimised plan hits every target and the minimum-staffing rule. */
 export function suggestDay(ctx: Ctx, team: Team, bd: number | null, warn?: Set<string>): number {
   if (bd == null) return 0;
-  const req = teamReq(ctx, team, bd), al = allowedStarts();
+  const req = teamReq(ctx, team, bd), al = allowedStarts(ctx);
   // headcount is sized on the plain, cover-only rota, so start-time preferences can never add people
   const ok = (H: number) => {
     if (H < minPpl(ctx)) return false;
@@ -125,7 +126,7 @@ export function minCoverH(ctx: Ctx, team: Team, d: number | null): number {
   if (d == null) return 0;
   const f = minSeat(ctx), p = minPpl(ctx);
   if (!f && !p) return 0;
-  const req = Array.from({ length: 48 }, (_, i) => (isOpenIv(ctx, i) ? f : 0)), al = allowedStarts();
+  const req = Array.from({ length: 48 }, (_, i) => (isOpenIv(ctx, i) ? f : 0)), al = allowedStarts(ctx);
   for (let H = Math.max(1, p); H < 200; H++) if (coverOK(ctx, team, d, coverage(ctx, optimise(ctx, req, H, null, al, d)).on)) return H;
   return 200;
 }

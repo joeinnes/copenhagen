@@ -6,6 +6,7 @@
   import Check from './Check.svelte';
   import Sel from './Sel.svelte';
   import Seg from './Seg.svelte';
+  import StartWindows from './StartWindows.svelte';
 
   let closeEl;
   $effect(() => { if (ui.drawer === 'setup') setTimeout(() => closeEl?.focus(), 50); });
@@ -59,6 +60,11 @@
       <h3>Start times</h3>
       <label class="inline"><Check k="shiftPrefs" id="shiftPrefs" /> Prefer sociable start times</label>
       <p class="hint">Avoids starting shifts between 23:00 and 06:00, and favours 08:00–10:00, 13:00–15:00 and 21:00–22:30, but only where the same headcount still hits every target and the contract risk aim. Headcount is always sized first, so this never adds agents.</p>
+    </section>
+    <section class="grp">
+      <h3>Blocked start times</h3>
+      <p class="hint">Times when no shift may start, for example to fit a site's opening or transport. A hard rule: the headcount is sized around it, so blocking busy times can cost agents. Click or drag across the strip.</p>
+      <StartWindows />
     </section>
     <section class="grp">
       <h3>Part-time shifts</h3>

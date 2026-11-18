@@ -331,3 +331,12 @@ details.method .foot{margin-top:6px}
   .stage .wb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stage .wb-val{font-size:27px}
 }
+/* blocked start times: one cell per half hour */
+.starts{display:grid;gap:6px}
+.starts-strip{display:grid;grid-template-columns:repeat(48,minmax(0,1fr));gap:1px;padding:4px;background:var(--raise);border:1px solid var(--line);border-radius:8px;touch-action:none;user-select:none;cursor:pointer}
+.starts-strip .sc{height:28px;border:0;padding:0;border-radius:2px;background:var(--panel);cursor:pointer;min-width:0}
+.starts-strip .sc.ideal{background:var(--good-soft)}
+.starts-strip .sc.night{background:color-mix(in srgb,var(--line) 60%,var(--panel))}
+.starts-strip .sc.blocked{background:repeating-linear-gradient(135deg,var(--bad) 0 3px,var(--bad-soft) 3px 6px)}
+.starts-strip .sc:hover{outline:1px solid var(--ink-2);outline-offset:-1px}
+.starts .bars-x{padding-inline:4px}
