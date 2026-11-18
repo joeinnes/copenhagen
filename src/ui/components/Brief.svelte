@@ -21,6 +21,7 @@
     const shifts = ['9-hour shifts with lunch'];
     if (S.ptOn) shifts.push(`up to ${S.ptShare}% part-time (${S.ptHours}h)`);
     if (S.weLong) shifts.push(`${S.weLongHours || 12}-hour weekend shifts`);
+    if (S.shiftPrefs !== false) shifts.push('sociable starts preferred');
     return {
       demand: on.map((c) => ({ c, name: CHN[c], vol: `${fmtN(E[c].vol)} ${per[S.period]}`, sub: aht(c, E[c].aht) })),
       open: `${hours}, ${daysTxt(S.openDays)}`,

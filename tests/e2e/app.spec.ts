@@ -6,7 +6,7 @@ test.describe('first load', () => {
     const errors = await open(page);
     await settled(page);
     await expect(headline(page)).toHaveText('68');
-    await expect(page.locator('#sizing')).toContainText('99.2%');
+    await expect(page.locator('#sizing')).toContainText('99.0%');
     await expect(page.locator('#sizing')).toContainText('at most 1 missed month in 84');
     await expect(page.locator('#sizing')).toContainText('Matched to the recommendation');
     expect(errors).toEqual([]);
@@ -68,8 +68,7 @@ test.describe('demand and targets', () => {
     await page.locator('#openDemand').click();
     await page.locator('#vVol').fill('16800');
     await page.keyboard.press('Escape');
-    await settled(page);
-    expect(Number(await headline(page).textContent())).toBeGreaterThan(90);
+    await expect.poll(async () => Number(await headline(page).textContent()), { timeout: 30_000 }).toBeGreaterThan(90);
   });
 
   test('opening hours chosen from the dropdowns keep the volumes (the old NaN bug)', async ({ page }) => {
@@ -184,6 +183,8 @@ test.describe('report and schedule', () => {
     await expect(page.locator('#rota')).toBeInViewport();
     await expect(page.locator('#shFacts')).toContainText('distinct start times');
     await expect(page.locator('#shGantt svg')).toBeVisible();
+    await expect(page.locator('#shSub')).toContainText('Night starts (23:00–05:30) are avoided');
+    await expect(page.locator('#shFacts')).toContainText('night starts');
   });
 });
 

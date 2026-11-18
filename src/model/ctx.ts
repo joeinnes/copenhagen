@@ -10,6 +10,8 @@ export interface Ctx {
   memo: Map<string, unknown>;
   planMemo: Map<string, number[]>;
   erl: ErlangOpts;
+  /** Place shifts purely on cover, ignoring start-time preferences (set when sociable starts would cost headcount). */
+  plainPlans?: boolean;
 }
 
 export function makeCtx(S: Config): Ctx {

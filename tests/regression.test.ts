@@ -10,6 +10,8 @@ function scenario(cfg: Record<string, unknown>): Config {
     (ks.reduce((o: any, k) => o[k], S) as any)[last] = v;
   }
   S.confOn = false;
+  // the baseline predates start-time preferences: compare against rotas placed purely on cover
+  S.shiftPrefs = false;
   return S;
 }
 const r6 = (x: number) => Math.round(x * 1e6) / 1e6;
@@ -50,6 +52,7 @@ describe.each(scenarios)('%s', (_name, b) => {
 
 describe('confidence search (default: at most 1 missed month in 84)', () => {
   const S = defaults();
+  S.shiftPrefs = false;
   const ctx = makeCtx(S);
   const { rec, minh } = computeRec(ctx);
   it('aims for 98.8% of months', () => {

@@ -54,14 +54,22 @@ export function periodP(ctx: Ctx, hc: Rec): number {
   return worstP(ctx, runMC(ctx, { period: confPeriodNow(ctx.S) === 'week' ? 'week' : 'month', hc, plan, seed: 4242 }).P);
 }
 
-export interface ConfResult { hc: Rec; p: number | null; f: number }
+export interface ConfResult {
+  hc: Rec; p: number | null; f: number;
+  /** True when sociable start times would have missed the aim at this roster, so the rota should be placed purely on cover. */
+  plain: boolean;
+}
 
 /**
  * Smallest roster that hits every target in the aimed-for share of simulated periods.
  * Stage 1 scales every team by the same factor to get close; stage 2 takes agents out one at a time from whichever
  * team and day type can spare one, keeping the removal that leaves the best odds, until none can come out.
  */
-export function searchConfidence(ctx: Ctx, rec0: Rec, minh: Rec, budgetMs = 8000): ConfResult {
+export function searchConfidence(ctxIn: Ctx, rec0: Rec, minh: Rec, budgetMs = 8000): ConfResult {
+  // The roster is always found with rotas placed purely on cover, so start-time preferences can never add headcount.
+  // Afterwards the sociable rota is checked at that same roster; if it falls short of the aim, the plain rota is used.
+  const prefs = ctxIn.S.shiftPrefs !== false && !ctxIn.plainPlans;
+  const ctx: Ctx = prefs ? { ...makeCtx(ctxIn.S), plainPlans: true } : ctxIn;
   const target = confTarget(ctx.S), t0 = Date.now(), fte = (hc: Rec) => sizing(ctx, hc).tot.contract;
   let lo: number, hi: number, pHi: number | null = null;
   const p1 = periodP(ctx, scaleRec(ctx, rec0, minh, 1));
@@ -87,7 +95,9 @@ export function searchConfidence(ctx: Ctx, rec0: Rec, minh: Rec, budgetMs = 8000
     if (best) { cur = best.hc; pHi = best.p; }
     if (!best || late) break;
   }
-  return { hc: cur, p: pHi, f: fte(rec0) ? fte(cur) / fte(rec0) : 1 };
+  let plain = !!ctxIn.plainPlans || !prefs, p = pHi;
+  if (prefs && pHi != null) { const pp = periodP(ctxIn, cur); if (pp >= target) p = pp; else plain = true; }
+  return { hc: cur, p, f: fte(rec0) ? fte(cur) / fte(rec0) : 1, plain };
 }
 
 /** FTE needed at other call targets (forecast-based), holding everything else the same. */

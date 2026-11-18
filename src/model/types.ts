@@ -50,6 +50,8 @@ export interface Config {
   /** Full-time agents work long shifts (weLongHours) at weekends instead of 9-hour ones. */
   weLong?: boolean;
   weLongHours?: number;
+  /** Prefer sociable shift start times when the rota can keep the same cover. */
+  shiftPrefs?: boolean;
   shared: boolean;
   clients: number;
   confOn: boolean;

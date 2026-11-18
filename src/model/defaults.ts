@@ -25,7 +25,7 @@ export const DEFAULT: Config = {
   },
   langs: [{ name: 'English', share: 0, on: true }, { name: 'French', share: 14, on: true }, { name: 'German', share: 8, on: false }],
   mode: 'blended', hc: {}, shrink: 20, spare: true, abTarget: 8, slBasis: 'offered', shortAb: 5, model: 'A', name: 'Untitled scenario',
-  autoSize: true, alDays: 24, sickDays: 5, minOn: true, minOnSeat: 2, minPeople: 3, ptOn: false, ptHours: 4, ptShare: 30, weLong: false, weLongHours: 12,
+  autoSize: true, alDays: 24, sickDays: 5, minOn: true, minOnSeat: 2, minPeople: 3, ptOn: false, ptHours: 4, ptShare: 30, weLong: false, weLongHours: 12, shiftPrefs: true,
   shared: false, clients: 3, confOn: true, conf: 99, confPeriod: 'month', confMode: 'misses', contractMonths: 84, missesAllowed: 1, cleanChance: 90,
 };
 

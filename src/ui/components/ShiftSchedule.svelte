@@ -1,8 +1,9 @@
 <script>
   // The shift schedule: optimal start times for a day, cover against the requirement, and a CSV copy.
-  import { ui, S, DOW, PLAN, live, getTeams, teamReq, coverage, shS, shPT, shKind, shMins, shSegs, shLabel, shDesc, ptLen } from '../engine.svelte.js';
+  import { ui, S, DOW, PLAN, ROTA_PLAIN, live, getTeams, teamReq, coverage, shS, shPT, shKind, shMins, shSegs, shLabel, shDesc, ptLen } from '../engine.svelte.js';
   import { pct, hhmm } from '../format.js';
   import { shiftGantt, shiftCover } from '../charts.js';
+  import { isNightStart } from '../../model';
   import Seg from './Seg.svelte';
   import Section from './Section.svelte';
 
@@ -18,7 +19,10 @@
     for (const t of sel) { const q = teamReq(t, day), c = coverage(PLAN[day]?.[t.id] || []).on; for (let i = 0; i < 48; i++) { req[i] += q[i]; on[i] += c[i]; } }
     const reqH = req.reduce((a, b) => a + b, 0) / 2, onH = on.reduce((a, b) => a + b, 0) / 2, under = req.reduce((a, r, i) => a + Math.max(0, r - on[i]), 0) / 2;
     const starts = groups.map((x) => shS(x.s) * 30);
-    return { teams, sel, groups, tot, openDays: S.openDays.slice(), shrink: S.shrink,
+    const prefNote = S.shiftPrefs === false ? 'Start times are placed purely on cover.'
+      : ROTA_PLAIN ? 'Start times are placed purely on cover: sociable start times would have needed more agents to hit the contract risk aim.'
+      : 'Night starts (23:00–05:30) are avoided and 08:00–10:00, 13:00–15:00 and 21:00–22:30 preferred, wherever the same headcount still hits every target.';
+    return { teams, sel, groups, tot, openDays: S.openDays.slice(), shrink: S.shrink, prefNote, night: groups.filter((x) => isNightStart(x.s)).reduce((a, x) => a + x.n, 0),
       sub: `The optimal start times for ${DOW[day]}'s forecast with ${tot} agents on shift. ${S.weLong && day >= 5 ? `Full-time agents work ${S.weLongHours || 12}-hour (L) shifts today, with breaks covered by shrinkage` : 'Full-time shifts are 4 hours on, a 1-hour lunch, then 4 hours on'}${S.ptOn ? `; part-time (PT) shifts are ${ptLen() / 2} hours with no lunch` : ''}.`,
       range: groups.length ? hhmm(Math.min(...starts)) + ' – ' + hhmm(Math.max(...starts)) : '–', need: onH ? pct(reqH / onH, 0) : '–', under: under.toFixed(1),
       gantt: shiftGantt({ groups, multiTeam: sel.length > 1, shS, shKind, shSegs, shLabel, shDesc }), cover: shiftCover(req, on) };
@@ -46,11 +50,12 @@
         <button class="btn" id="shCopy" onclick={copy}>{copyTxt}</button>
       </div>
     </div>
-    <p class="hint" id="shSub">{v.sub}</p>
+    <p class="hint" id="shSub">{v.sub} {v.prefNote}</p>
     <div class="facts" id="shFacts">
       <div class="fact"><b>{v.groups.length}</b><span>distinct start times</span></div>
       <div class="fact"><b>{v.tot}</b><span>shifts</span></div>
       <div class="fact"><b>{v.range}</b><span>first and last start</span></div>
+      <div class="fact"><b>{v.night}</b><span>night starts (23:00–05:30)</span></div>
       <div class="fact"><b>{v.need}</b><span>of on-seat hours needed for target</span></div>
       <div class="fact"><b>{v.under}h</b><span>short of requirement across the day</span></div>
     </div>

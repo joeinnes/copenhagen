@@ -42,8 +42,11 @@ export function setP(p,v){const ks=p.split('.'),l=ks.pop();ks.reduce((o,k)=>o[k]
 // A context holds the scenario plus memo tables that are only valid for it. Any change to S goes through recompute(),
 // which starts a fresh context; if S itself is replaced (a loaded scenario), C() notices and starts one too.
 let mctx=null;
-const C=()=>{if(!mctx||mctx.S!==S)mctx=M.makeCtx(S);return mctx};
-const freshCtx=()=>{mctx=M.makeCtx(S);return mctx};
+// Set by the contract-risk search when sociable start times would have cost headcount: rotas are then placed purely on cover.
+export let ROTA_PLAIN=false;
+const newCtx=()=>{const c=M.makeCtx(S);c.plainPlans=ROTA_PLAIN;return c};
+const C=()=>{if(!mctx||mctx.S!==S)mctx=newCtx();return mctx};
+const freshCtx=()=>{mctx=newCtx();return mctx};
 export const openDayCount=()=>M.openDayCount(C()), weeklyVol=c=>M.weeklyVol(C(),c);
 export const isOpenIv=i=>M.isOpenIv(C(),i), activeLangs=()=>M.activeLangs(C()), langFrac=k=>M.langFrac(C(),k);
 export const getTeams=()=>M.getTeams(C()), ghostK=()=>M.ghostK(C()), clientShare=()=>M.clientShare(C());
@@ -114,6 +117,7 @@ function startConf(){
   sim({type:'conf',S,rec0:REC0,minh:MINH}).then(r=>{
     if(g!==CONF.gen)return;
     CONF.busy=false;CONF.p=r.p;CONF.f=r.f;REC=r.hc;
+    if(ROTA_PLAIN!==!!r.plain){ROTA_PLAIN=!!r.plain;freshCtx()}
     for(const t of getTeams())if(S.autoSize||!S.hc[t.id])S.hc[t.id]={...(REC[t.id]||{wd:0,we:0})};
     // the roster changed, so restart the month, but keep the clock where the user left it
     computePlans();{const t=simSec;doSimReset();simSec=t}evalLive();buildMTD();F.buildLayout();ui.sizing++;ui.rev++;ui.live++;scheduleMC();save()});
@@ -198,7 +202,7 @@ export function dayCover(){
 export let MC={};
 let mcGen=0,tMC=0;
 function requestMC(period){const g=mcGen;
-  sim({type:'mc',S,hc:S.hc,period}).then(r=>{if(g!==mcGen)return;MC[period]=r;ui.mc++})}
+  sim({type:'mc',S,hc:S.hc,period,plain:ROTA_PLAIN}).then(r=>{if(g!==mcGen)return;MC[period]=r;ui.mc++})}
 function scheduleMC(onlyDay){clearTimeout(tMC);if(!onlyDay)mcGen++;MC=onlyDay?{...MC,day:null}:{};ui.mc++;
   tMC=setTimeout(()=>{MC.day=runDayMC();if(ui.repPeriod!=='day'&&!MC[ui.repPeriod])requestMC(ui.repPeriod);ui.mc++},120)}
 export function setRepPeriod(v){ui.repPeriod=v;
@@ -214,6 +218,7 @@ export function changed(what,light){
   save();ui.scen++;ui.inputs++;clearTimeout(tChange);tChange=setTimeout(()=>recompute(),light?220:60);
 }
 function recompute(){
+  if(needRec)ROTA_PLAIN=false;
   freshCtx();
   if(needRec){const r=M.computeRec(C());REC0=r.rec;MINH=r.minh;REC_WARN=new Set(r.warn);
     REC=S.confOn&&CONF.f?M.scaleRec(C(),REC0,MINH,CONF.f):REC0;needRec=false;startTrade();

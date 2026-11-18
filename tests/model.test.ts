@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  backlogRun, computePlans, computeRec, confTarget, coverage, defaults, erlang, erlangCore, getTeams, makeCtx, minAgents, sizing,
+  backlogRun, computePlans, computeRec, confTarget, coverage, defaults, erlang, erlangCore, getTeams, isNightStart, makeCtx, meetsTargets,
+  minAgents, searchConfidence, sizing, startPenalty,
 } from '../src/model';
 
 const offered = { slBasis: 'offered' as const, shortAb: 5 };
@@ -123,4 +124,35 @@ describe('long weekend shifts', () => {
     const cov = coverage(ctx, plan[6][id]).on;
     expect(Math.min(...cov)).toBeGreaterThanOrEqual(2);
   });
+});
+
+describe('sociable start times', () => {
+  it('scores starts: ideal windows free, nights dearest', () => {
+    expect([16, 20, 26, 30, 42, 45].map(startPenalty)).toEqual([0, 0, 0, 0, 0, 0]); // 08:00 10:00 13:00 15:00 21:00 22:30
+    expect([46, 0, 6, 11].map(startPenalty)).toEqual([3, 3, 3, 3]); // 23:00 00:00 03:00 05:30
+    expect([12, 14, 22, 36].map(startPenalty)).toEqual([1, 1, 1, 1]); // 06:00 07:00 11:00 18:00
+  });
+  const both = () => {
+    const on = makeCtx(defaults()), offS = defaults(); offS.shiftPrefs = false;
+    return { on, off: makeCtx(offS) };
+  };
+  it('never changes the recommended headcount', () => {
+    const { on, off } = both();
+    expect(computeRec(on).rec).toEqual(computeRec(off).rec);
+  });
+  it('uses fewer night starts, and every day still meets the targets the plain rota met', () => {
+    const { on, off } = both(), rec = computeRec(on).rec, pOn = computePlans(on, rec), pOff = computePlans(off, rec);
+    let nOn = 0, nOff = 0;
+    for (let d = 0; d < 7; d++) for (const t of getTeams(on)) {
+      nOn += pOn[d][t.id].filter(isNightStart).length; nOff += pOff[d][t.id].filter(isNightStart).length;
+      if (meetsTargets(off, t, d, coverage(off, pOff[d][t.id]).on)) expect(meetsTargets(on, t, d, coverage(on, pOn[d][t.id]).on)).toBe(true);
+    }
+    expect(nOn).toBeLessThan(nOff);
+  });
+  it('the contract-risk search finds the same roster as with plain rotas, and still meets the aim', () => {
+    const { on, off } = both(), r0 = computeRec(on);
+    const a = searchConfidence(on, r0.rec, r0.minh, 60_000), b = searchConfidence(off, r0.rec, r0.minh, 60_000);
+    expect(a.hc).toEqual(b.hc);
+    expect(a.p!).toBeGreaterThanOrEqual(confTarget(on.S));
+  }, 120_000);
 });

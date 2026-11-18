@@ -56,6 +56,11 @@
       <p class="hint">Every full-time shift is the full 9 hours: 4 hours on, a 1-hour lunch, then 4 hours on, unless long weekend shifts are on. Shifts can start on any half hour and may run past midnight into the next day. Each day's rota is optimised against that day's forecast. Opening hours can also run past midnight, for example 18:00 to 06:00.</p>
     </section>
     <section class="grp">
+      <h3>Start times</h3>
+      <label class="inline"><Check k="shiftPrefs" id="shiftPrefs" /> Prefer sociable start times</label>
+      <p class="hint">Avoids starting shifts between 23:00 and 06:00, and favours 08:00–10:00, 13:00–15:00 and 21:00–22:30, but only where the same headcount still hits every target and the contract risk aim. Headcount is always sized first, so this never adds agents.</p>
+    </section>
+    <section class="grp">
       <h3>Part-time shifts</h3>
       <label class="inline"><Check k="ptOn" id="ptOn" /> Use part-time shifts</label>
       <div class="inline">Part-time shifts last <Sel k="ptHours" id="ptHours" style="width:auto"><option value="4">4 hours</option><option value="5">5 hours</option><option value="6">6 hours</option></Sel> with no lunch</div>

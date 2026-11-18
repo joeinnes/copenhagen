@@ -2,7 +2,7 @@ import type { Plan, Rec, Sched, Team } from './types';
 import { CH, DEFER } from './defaults';
 import { type Ctx } from './ctx';
 import { attend, coverOK, dayVol, getTeams, isOpenIv, isWE, minPpl, minSeat, teamReq, weekdayOpen, weekendOpen } from './demand';
-import { allowedStarts, coverage, longLen, longOn, optimise, ptCount, ptLen } from './shifts';
+import { allowedStarts, coverage, isNightStart, longLen, longOn, optimise, planPenalty, ptCount, ptLen, shS } from './shifts';
 import { evalTeamDay, summarise } from './evaluate';
 
 /** Agents rostered for a team on a day (weekday or weekend headcount), zero if the desk is closed. */
@@ -19,14 +19,66 @@ export function deskCount(ctx: Ctx, hc: Rec, id: string): number {
   return Math.max(weekdayOpen(ctx) ? Math.round(h.wd) : 0, weekendOpen(ctx) ? Math.round(h.we) : 0);
 }
 
+/** Does this cover hit every target for a team on a day, on the forecast? */
+export function meetsTargets(ctx: Ctx, team: Team, d: number, cov: ArrayLike<number>): boolean {
+  const S = ctx.S, E = S.ch;
+  const r = evalTeamDay(ctx, team, d, 1, cov, null, null, attend(ctx));
+  const s = summarise(ctx, { teams: { x: r } }).ch;
+  if (s.voice.off > 0 && (s.voice.sla / s.voice.off < E.voice.slPct / 100 || s.voice.ab / s.voice.off > S.abTarget / 100)) return false;
+  if (s.chat.off > 0 && s.chat.sla / s.chat.off < E.chat.slPct / 100) return false;
+  for (const c of DEFER) if (s[c].off > 0 && s[c].sla / s[c].off < E[c].slPct / 100) return false;
+  return true;
+}
+/** Agent-hours on the day where cover falls short of the requirement. */
+const shortfall = (req: ArrayLike<number>, cov: ArrayLike<number>) => { let s = 0; for (let i = 0; i < 48; i++) s += Math.max(0, req[i] - cov[i]); return s / 2; };
+
+/** Preference strengths tried in turn when looking for a more sociable rota (see startPenalty). */
+const PREF_STEPS = [8, 4, 2, 1];
+/** Where a night start goes instead: later into the morning first (06:00–07:00), then earlier into the evening (21:00–22:30). */
+const NIGHT_MOVES = [12, 13, 14, 45, 44, 43, 42];
+/**
+ * The rota for one team and day at a given headcount. The optimiser first places shifts purely on cover; headcount is
+ * always sized on that plain rota, so nothing here adds people. If the scenario prefers sociable start times:
+ *  1. re-run the optimiser with start-time penalties, strongest first, and take the first rota that passes the checks;
+ *  2. then take each remaining night start (23:00–05:30) and move it to 06:00–07:00, or failing that 21:00–22:30,
+ *     keeping each move only if the rota still passes.
+ * The checks: minimum cover and every target the plain rota met are still met, and the under-covered agent-hours grow by
+ * no more than 5% (at least half an agent-hour), so the rota's odds over many simulated days barely move.
+ */
+export function planDay(ctx: Ctx, team: Team, d: number, H: number): number[] {
+  const req = teamReq(ctx, team, d), al = allowedStarts(), base = optimise(ctx, req, H, null, al, d);
+  if (ctx.plainPlans || ctx.S.shiftPrefs === false || !base.length || !planPenalty(base)) return base;
+  const cov0 = coverage(ctx, base).on, cover0 = coverOK(ctx, team, d, cov0), meets0 = meetsTargets(ctx, team, d, cov0);
+  const maxShort = shortfall(req, cov0) * 1.05 + 0.5;
+  const passes = (p: number[]) => {
+    const cov = coverage(ctx, p).on;
+    return (!cover0 || coverOK(ctx, team, d, cov)) && shortfall(req, cov) <= maxShort && (!meets0 || meetsTargets(ctx, team, d, cov));
+  };
+  let best = base;
+  for (const pref of PREF_STEPS) {
+    const p = optimise(ctx, req, H, null, al, d, pref);
+    if (planPenalty(p) < planPenalty(best) && passes(p)) { best = p; break; }
+  }
+  best = best.slice();
+  for (let k = 0; k < best.length; k++) {
+    if (!isNightStart(best[k])) continue;
+    const kind = best[k] - shS(best[k]);
+    for (const s of NIGHT_MOVES) {
+      const trial = best.slice(); trial[k] = kind + s;
+      if (passes(trial)) { best = trial; break; }
+    }
+  }
+  return best.sort((x, y) => x - y);
+}
+
 /** Optimised shift plans for every day and team. Memoised per team, day and headcount within a context. */
 export function computePlans(ctx: Ctx, hc: Rec): Plan {
-  const plan: Plan = {}, al = allowedStarts();
+  const plan: Plan = {};
   for (let d = 0; d < 7; d++) {
     plan[d] = {};
     for (const t of getTeams(ctx)) {
       const H = rosterSize(ctx, hc, t.id, d), k = `${t.id}|${d}|${H}`;
-      if (!ctx.planMemo.has(k)) ctx.planMemo.set(k, optimise(ctx, teamReq(ctx, t, d), H, null, al, d));
+      if (!ctx.planMemo.has(k)) ctx.planMemo.set(k, planDay(ctx, t, d, H));
       plan[d][t.id] = ctx.planMemo.get(k)!.slice();
     }
   }
@@ -52,17 +104,12 @@ export function busiest(ctx: Ctx, team: Team, days: number[]): number | null {
 /** Smallest roster for a team on a day whose optimised plan hits every target and the minimum-staffing rule. */
 export function suggestDay(ctx: Ctx, team: Team, bd: number | null, warn?: Set<string>): number {
   if (bd == null) return 0;
-  const S = ctx.S, E = S.ch, req = teamReq(ctx, team, bd), al = allowedStarts();
+  const req = teamReq(ctx, team, bd), al = allowedStarts();
+  // headcount is sized on the plain, cover-only rota, so start-time preferences can never add people
   const ok = (H: number) => {
     if (H < minPpl(ctx)) return false;
     const cov = coverage(ctx, optimise(ctx, req, H, null, al, bd)).on;
-    if (!coverOK(ctx, team, bd, cov)) return false;
-    const r = evalTeamDay(ctx, team, bd, 1, cov, null, null, attend(ctx));
-    const s = summarise(ctx, { teams: { x: r } }).ch;
-    if (s.voice.off > 0 && (s.voice.sla / s.voice.off < E.voice.slPct / 100 || s.voice.ab / s.voice.off > S.abTarget / 100)) return false;
-    if (s.chat.off > 0 && s.chat.sla / s.chat.off < E.chat.slPct / 100) return false;
-    for (const c of DEFER) if (s[c].off > 0 && s[c].sla / s[c].off < E[c].slPct / 100) return false;
-    return true;
+    return coverOK(ctx, team, bd, cov) && meetsTargets(ctx, team, bd, cov);
   };
   const tot = req.reduce((a, x) => a + x, 0);
   let lo = Math.max(1, minPpl(ctx), Math.floor((tot / 16) * 0.6)), hi = Math.max(lo + 2, Math.ceil((tot / 16) * 1.6) + 4);

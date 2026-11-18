@@ -31,6 +31,20 @@ export function typesFor(ctx: Ctx, H: number, d?: number): number[] {
   return [...Array(Math.max(0, H - pt)).fill(ft), ...Array(pt).fill(1)];
 }
 
+/**
+ * How much a start time is disliked, per shift: 0 for the ideal handover windows (08:00–10:00, 13:00–15:00, 21:00–22:30),
+ * 3 for night starts (23:00–05:30), 1 for anything else. Used only when the scenario prefers sociable starts.
+ */
+export function startPenalty(s: number): number {
+  s = ((s % 48) + 48) % 48;
+  if (s >= 46 || s < 12) return 3;
+  if ((s >= 16 && s <= 20) || (s >= 26 && s <= 30) || (s >= 42 && s <= 45)) return 0;
+  return 1;
+}
+export const isNightStart = (x: number) => startPenalty(shS(x)) === 3;
+/** Total start-time penalty of a plan (lower is more sociable). */
+export const planPenalty = (starts: number[]) => starts.reduce((a, x) => a + startPenalty(shS(x)), 0);
+
 /** Every shift may start on any half hour, running past midnight into the next day. */
 export const allowedStarts = () => [...Array(48).keys()];
 
@@ -51,7 +65,7 @@ export function coverage(ctx: Ctx, starts: number[], skip?: Set<number>) {
  * A closed half hour costs a flat 1.5 per agent on seat (a missing agent while open costs 6), so shifts only
  * overhang the opening hours when that buys real cover.
  */
-export function optimise(ctx: Ctx, req: ArrayLike<number>, types: number[] | number, fixedCov: ArrayLike<number> | null, allowed: number[], d?: number): number[] {
+export function optimise(ctx: Ctx, req: ArrayLike<number>, types: number[] | number, fixedCov: ArrayLike<number> | null, allowed: number[], d?: number, pref = 0): number[] {
   if (typeof types === 'number') types = typesFor(ctx, types, d);
   const cov = fixedCov ? Float64Array.from(fixedCov) : new Float64Array(48);
   if (!allowed.length || !types.length) return [];
@@ -61,7 +75,7 @@ export function optimise(ctx: Ctx, req: ArrayLike<number>, types: number[] | num
   const delta = (s: number, t: number, sg: number) => {
     const m = MK[t]; let d = 0;
     for (let j = 0; j < m.length; j++) { if (!m[j]) continue; const i = (s + j) % 48; d += cost(req[i], cov[i] + sg, i) - cost(req[i], cov[i], i); }
-    return d;
+    return pref ? d + sg * pref * startPenalty(s) : d;
   };
   const add = (s: number, t: number, sg: number) => { const m = MK[t]; for (let j = 0; j < m.length; j++) if (m[j]) cov[(s + j) % 48] += sg; };
   const rem = [0, 1, 2].map((k) => types.filter((t) => t === k).length), st: number[] = [], ty: number[] = [];
