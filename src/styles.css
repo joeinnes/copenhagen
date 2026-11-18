@@ -4,7 +4,7 @@ html,body{margin:0}
 body{font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
 img{max-width:100%}
 [hidden]{display:none!important}
-/* Layout: a control strip, then the LED wallboard hung above a live drawing of the floor, then the forecast report. Demand and desk set-up slide in as drawers. */
+/* Layout: a slim scenario bar, a sticky step bar, then the five steps of the flow as panels (brief, headcount, SLA risk, rota, live floor). Inputs slide in as drawers. */
 :root{
   --bg:#E6E9EC; --panel:#F6F7F8; --raise:#FFFFFF; --ink:#151A21; --ink-2:#465061; --muted:#727D8E; --line:#CDD3DA;
   --accent:#A85F00; --accent-soft:#F6E7CF; --accent-ink:#FFFFFF;
@@ -148,7 +148,7 @@ td.ok{color:var(--good)}td.miss{color:var(--bad)}
 .foot{color:var(--muted);font-size:12px;margin:0;max-width:90ch}
 
 /* sizing */
-.sizing{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px 30px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+.sizing{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px 30px;align-items:center;background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
 @media (max-width:860px){.sizing{grid-template-columns:1fr}}
 .eyebrow{font:600 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .need{display:flex;align-items:baseline;gap:8px}
@@ -174,7 +174,8 @@ tr.tot td{font-weight:700;border-bottom:0}
 .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .seg button:disabled{opacity:.35;cursor:not-allowed}
 /* scenarios */
-.scen{position:relative;display:flex;gap:6px;align-items:center;flex:1 1 380px;max-width:600px;min-width:0}
+.scen{position:relative;display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1 1 380px;max-width:640px;min-width:0;margin-left:auto}
+.scen input{flex:1 1 180px}
 .scen input{font-weight:600;min-width:0}
 .btn:disabled{opacity:.55;cursor:default}
 .sc-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:15;width:min(420px,calc(100vw - 32px));max-height:60vh;overflow:auto;background:var(--raise);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:12px;display:grid;gap:8px}
@@ -266,3 +267,58 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
 .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--raise);border-radius:999px;padding:3px 4px 3px 10px;font-size:12px}
 .chip button{border:0;background:var(--line);border-radius:999px;cursor:pointer;font-size:11px;padding:2px 7px}
 .busy{font:12px var(--f-mono);color:var(--muted)}
+
+/* top bar */
+.topbar{padding-top:4px}
+.btn.help{width:34px;justify-content:center;padding-inline:0;border-radius:50%}
+.sc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;border-top:1px solid var(--line);padding-top:10px}
+
+/* step bar: sticky under the top bar; the band above it (under the phone's status bar) is painted to match */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:13;background:var(--bg)}
+.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:12;margin-inline:-4px;padding:6px 4px;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.steps ol{list-style:none;margin:0;padding:0;display:flex;gap:2px;min-width:max-content}
+.steps button{display:inline-flex;align-items:center;gap:8px;border:0;background:none;padding:6px 12px 6px 6px;border-radius:999px;font-weight:600;font-size:13px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.steps button:hover{background:var(--panel);color:var(--ink)}
+.steps i{font:700 11px/1 var(--f-mono);font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--ink-2)}
+.steps button[aria-current]{background:var(--raise);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.steps button[aria-current] i{background:var(--accent);color:var(--accent-ink)}
+.steps-fte{font:600 12px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:999px}
+
+/* steps of the flow */
+.sec{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 60px)}
+.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px}
+.sec-title{display:grid;gap:3px;min-width:0}
+.sec-title .eyebrow{color:var(--accent)}
+.sec-title h2{font-size:21px}
+.sec-title .hint{max-width:75ch}
+details.method summary{cursor:pointer;color:var(--ink-2);font-size:12.5px;font-weight:600;width:max-content;max-width:100%}
+details.method summary:hover{color:var(--ink)}
+details.method .foot{margin-top:6px}
+
+/* step 1: brief */
+.brief{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:980px){.brief{grid-template-columns:1fr}}
+.bcard{background:var(--raise);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-rows:auto 1fr auto;gap:12px;min-width:0}
+.bcard header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.bcard h3{margin:0;font-family:var(--f-display);font-stretch:110%;font-weight:800;font-size:16px}
+.bcard dl{margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:7px 14px;font-size:13px;align-content:start}
+.bcard dt{color:var(--muted);display:flex;align-items:center;gap:7px}
+.bcard dd{margin:0;display:grid;min-width:0}
+.bcard dd b{font:600 13px var(--f-mono);font-variant-numeric:tabular-nums}
+.bcard dd span{font-size:12px;color:var(--muted)}
+.bcard .btn{justify-self:start}
+
+/* step 4: rota (was a dialog) */
+.rota{display:grid;gap:14px}
+.rota .seg{flex-wrap:wrap}
+
+/* step 5: live floor */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.tb-group{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sick-list{align-items:center}
+.floor-wrap{display:grid;gap:8px}
+.legend-tip{color:var(--muted)}
+@media (max-width:600px){.sec-title h2{font-size:19px}.report{padding:14px}.toolbar .clock{flex:1 1 100%}#scrub{flex:1;width:auto}}
+.clock select{width:auto}
+.gantt-scroll{overflow:auto;max-height:440px;overscroll-behavior:contain}
+@media (max-width:600px){.scen input{flex:1 1 100%}.scen .help{margin-left:auto}}

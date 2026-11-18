@@ -15,12 +15,13 @@
   <div id="spStart" hidden={tab !== 'start'}>
   <p class="sp-lede">Enter the volumes you expect and the service you're promising. Copenhagen works out the headcount, builds the rota, and plays out a day on the floor so you can see whether it holds.</p>
   <ol class="sp-steps">
-    <li><b>Set demand and targets</b><span>Open <em>Demand &amp; targets</em>. Volumes, handle times and the daily curve are the givens. Service targets are what you're selling: tighten them and the headcount goes up.</span></li>
-    <li><b>Read the answer</b><span>The strip under the top bar shows the FTE you need, after rest days (5 days in 7), annual leave and sickness. Further down, you'll find the split by team and the FTE for other call targets.</span></li>
-    <li><b>Check the rota</b><span><em>Shift schedule</em> shows the optimal start times for each day. <em>Will this rota hit target?</em> gives the odds of meeting each target today, this week or this month.</span></li>
-    <li><b>Stress-test it</b><span>Play the day on the floor and watch the wallboard. Click an agent to send them home sick, press <em>Major incident</em> to double call volume, then replan in <em>Desk set-up</em>.</span></li>
-    <li><b>Save and share</b><span>Name the scenario at the top, then Save it in this browser, or choose <em>Share link</em> to put the whole set-up in the page link.</span></li>
+    <li><b>Fill in the brief</b><span>Edit <em>Demand</em> (volumes, hours, languages), <em>Service targets</em> (what you're selling and how much risk you'll accept) and <em>Staffing</em> (shifts, leave, team rules). The page opens with an example desk, so you can explore before changing anything.</span></li>
+    <li><b>Read the headcount</b><span>The FTE you need, after rest days, leave and sickness, split by team, with the FTE for other call targets beside it. It's also pinned in the step bar as you scroll.</span></li>
+    <li><b>Check the SLA risk</b><span>The odds of meeting each target today, this week or this month.</span></li>
+    <li><b>Review the rota</b><span>Optimised start times for each day, with a CSV copy for the workforce team.</span></li>
+    <li><b>Stress-test it on the live floor</b><span>Play the day, send people home sick, start a major incident, then replan and watch the wallboard.</span></li>
   </ol>
+  <p class="hint">Name the scenario at the top to save it in this browser, or choose <em>Share link</em> to put the whole set-up in the page link.</p>
   </div>
   <div id="spHow" hidden={tab !== 'how'}>
     <ol class="sp-steps">

@@ -8,7 +8,7 @@
   const legend = [['#2a78d6', 'On a call'], ['#eb6834', 'Chatting'], ['#1baf7a', 'Emails'], ['#6250d6', 'Tickets'], ['#3ccf6e', 'Ready'], ['#f2b53a', 'Break or lunch'], ['#e34948', 'Off sick']];
 </script>
 
-<section>
+<div class="floor-wrap">
   <div class="floor" id="floor" bind:this={floorEl}>
     <canvas id="cv" bind:this={cv} aria-label="Contact centre floor. Click an agent to see their shift or send them home sick."></canvas>
     <div class="zoom" role="group" aria-label="Zoom">
@@ -28,6 +28,6 @@
   </div>
   <div class="legend">
     {#each legend as [c, t]}<span><i style:background={c}></i>{t}</span>{/each}
-    <span style="color:var(--muted)">Click an agent to see their shift. Zoom with +, pinch, Ctrl + scroll or double-click; drag to pan.</span>
+    <span class="legend-tip">Click an agent to see their shift. Zoom with +, pinch, Ctrl + scroll or double-click; drag to pan.</span>
   </div>
-</section>
+</div>

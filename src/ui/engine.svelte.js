@@ -17,7 +17,7 @@ export const { CH, CHN, DEFER, DOW, PRESET, DEFAULT, clamp, mulberry, hashStr, g
 
 export const ui = $state({
   inputs: 0, rev: 0, live: 0, sizing: 0, mc: 0, tick: 0, scen: 0,
-  drawer: null, shifts: false, splash: false, spHide: false, scPanel: false,
+  drawer: null, splash: false, spHide: false, scPanel: false,
   toast: null, pop: null, zoomed: false,
   playing: true, speed: 240, repPeriod: 'week',
 });
@@ -262,12 +262,10 @@ export function setField(k,raw,{type,scale=1,str=false,min,max}={}){
 
 /* ============ drawers, modals and the toast ============ */
 export function setDrawer(id){ui.drawer=id}
-export function openShifts(){ui.shifts=true}
-export function closeShifts(){ui.shifts=false}
 export function openSplash(){ui.splash=true}
 export function closeSplash(){if(!ui.splash)return;ui.splash=false;
   if(ui.spHide){try{localStorage.setItem('copenhagen.splash','off')}catch(e){}}}
-export function closeAll(){setDrawer(null);F.closePop();closeShifts();closeSplash()}
+export function closeAll(){setDrawer(null);F.closePop();closeSplash();ui.scPanel=false}
 let flashT=0;
 export function flash(msg,bad){ui.toast={msg,bad:!!bad};clearTimeout(flashT);flashT=setTimeout(()=>ui.toast=null,3200)}
 
@@ -276,7 +274,9 @@ export function flash(msg,bad){ui.toast={msg,bad:!!bad};clearTimeout(flashT);fla
 // (the artifact link only carries letters, digits and hyphens in its fragment).
 export const SC={list:[],curId:null,saved:null,confirmDel:null,lastHash:''};
 const snapshotS=()=>JSON.stringify(S);
-export function scDirty(){return SC.saved!==snapshotS()}
+// What counts as an edit: headcount is left out while it's matched to the recommendation, since the model fills it in.
+const editKey=()=>JSON.stringify(S.autoSize?{...S,hc:null}:S);
+export function scDirty(){return SC.saved!==editKey()}
 function localList(){try{return JSON.parse(localStorage.getItem('copenhagen.scenarios')||'[]')}catch(e){return []}}
 function localWrite(l){try{localStorage.setItem('copenhagen.scenarios',JSON.stringify(l));return true}catch(e){return false}}
 async function encodeConfig(obj){
@@ -294,7 +294,7 @@ async function decodeConfig(hash){
 }
 function applyConfig(cfg,name){
   S=Object.assign(structuredClone(DEFAULT),cfg);if(name)S.name=name;sanitise();
-  needRec=true;ui.inputs++;recompute();SC.saved=snapshotS();ui.scen++;
+  needRec=true;ui.inputs++;recompute();SC.saved=editKey();ui.scen++;
 }
 export async function openFromHash(){
   const h=location.hash;if(!h||h===SC.lastHash||!/^#cfg-/.test(h))return;
@@ -315,7 +315,7 @@ export function saveScenario(asNew){
   const l=localList().filter(x=>x.id!==id);
   l.unshift({id,name,config:snapshotS(),fte:sizing(REC).tot.contract,model:S.model,savedAt:Date.now()});
   if(!localWrite(l)){flash('This browser won’t let the page save. Use Share link instead.',true);return}
-  SC.list=l;SC.curId=id;SC.saved=snapshotS();save();flash(`Saved “${name}” in this browser`);ui.scen++;
+  SC.list=l;SC.curId=id;SC.saved=editKey();save();flash(`Saved “${name}” in this browser`);ui.scen++;
 }
 export function loadScenario(id){
   const sc=SC.list.find(x=>x.id===id);if(!sc)return;
@@ -332,7 +332,7 @@ export function toggleScPanel(){ui.scPanel=!ui.scPanel;SC.confirmDel=null;SC.lis
 /** Every setting back to its default. Saved scenarios are untouched. */
 export function resetAll(){
   SC.curId=null;SC.lastHash='';if(location.hash)location.hash='';
-  F.resetCam();setDrawer(null);closeShifts();
+  F.resetCam();setDrawer(null);ui.scPanel=false;
   simReset=true;applyConfig(structuredClone(DEFAULT));
   flash('Everything is back to the default settings. Saved scenarios are still under Saved.');
 }

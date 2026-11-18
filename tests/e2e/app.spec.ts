@@ -88,7 +88,7 @@ test.describe('demand and targets', () => {
     await open(page);
     await settled(page);
     const a = Number(await headline(page).textContent());
-    await page.locator('#openDemand').click();
+    await page.locator('#openTargets').click();
     await page.locator('#modelSeg button[data-v="C"]').click();
     await page.keyboard.press('Escape');
     await settled(page);
@@ -98,7 +98,7 @@ test.describe('demand and targets', () => {
 
   test('the contract aim converts to a per-month probability', async ({ page }) => {
     await open(page);
-    await page.locator('#openDemand').click();
+    await page.locator('#openTargets').click();
     await expect(page.locator('#confOut')).toContainText('98.8%');
     await page.locator('input[name="confMode"][value="clean"]').check();
     await page.locator('#cleanChance').fill('50');
@@ -112,9 +112,8 @@ test.describe('desk set-up', () => {
     await settled(page);
     await setClock(page, 10 * 60);
     const before = Number((await wallboardCell(page, 'Agents').textContent())!.match(/SICK\s*(\d+)/)![1]);
-    await page.locator('#openSetup').click();
     await page.locator('#sickBtn').click();
-    await page.keyboard.press('Escape');
+    await expect(page.locator('#sickList')).toContainText('off sick');
     await expect(wallboardCell(page, 'Agents')).toContainText(`SICK${before + 1}`);
   });
 
@@ -130,6 +129,28 @@ test.describe('desk set-up', () => {
     await expect(page.locator('#szTeams')).toContainText('French');
     const frenchRow = page.locator('#szTeams tr').filter({ hasText: 'French' });
     expect(Number((await frenchRow.locator('td').nth(1).textContent())!.trim().split(/\s/)[0])).toBeGreaterThanOrEqual(3);
+  });
+});
+
+test.describe('flow', () => {
+  test('the brief summarises the inputs and opens the matching drawer', async ({ page }) => {
+    await open(page);
+    await expect(page.locator('#brief')).toContainText('8,400 a week');
+    await expect(page.locator('#brief')).toContainText('80% in 30s');
+    await page.locator('#openSetup').click();
+    await expect(page.locator('#setup')).toHaveClass(/open/);
+    await page.locator('#weLong').check();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#brief')).toContainText('12-hour weekend shifts');
+  });
+
+  test('the step bar shows the headcount and jumps to each step', async ({ page }) => {
+    await open(page);
+    await settled(page);
+    await expect(page.locator('.steps')).toContainText('68 FTE');
+    await page.locator('.steps button', { hasText: 'Live floor' }).click();
+    await expect(page.locator('#live')).toBeInViewport();
+    await expect(page.locator('.steps button[aria-current]')).toContainText('Live floor');
   });
 });
 
@@ -149,7 +170,6 @@ test.describe('report and schedule', () => {
     await page.locator('#weLong').check();
     await page.keyboard.press('Escape');
     await settled(page);
-    await page.locator('#openShifts').click();
     await page.locator('#shDay button[data-v="5"]').click();
     await expect(page.locator('#shSub')).toContainText('12-hour (L) shifts');
     await expect(page.locator('#shGantt')).toContainText(' L');
@@ -160,11 +180,10 @@ test.describe('report and schedule', () => {
   test('the shift schedule shows the optimised rota', async ({ page }) => {
     await open(page);
     await settled(page);
-    await page.locator('#openShifts').click();
+    await page.locator('.steps button', { hasText: 'Rota' }).click();
+    await expect(page.locator('#rota')).toBeInViewport();
     await expect(page.locator('#shFacts')).toContainText('distinct start times');
     await expect(page.locator('#shGantt svg')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.locator('#shifts')).toBeHidden();
   });
 });
 
@@ -189,6 +208,7 @@ test.describe('scenarios', () => {
     await page.locator('#openDemand').click();
     await page.locator('#vVol').fill('9999');
     await page.keyboard.press('Escape');
+    await page.locator('#scOpen').click();
     await page.locator('#scReset').click();
     await expect(page.locator('#scReset')).toHaveText('Confirm reset');
     await page.locator('#scReset').click();
@@ -212,6 +232,7 @@ test.describe('floor', () => {
     await settled(page);
     await setClock(page, 12 * 60);
     const canvas = page.locator('#cv');
+    await canvas.scrollIntoViewIfNeeded();
     const box = (await canvas.boundingBox())!;
     // try a grid of points until one lands on an agent
     let shown = false;

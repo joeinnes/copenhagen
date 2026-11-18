@@ -2,6 +2,8 @@
   // "How many agents do I need?": recommended headcount by team, and FTE for other call targets.
   import { ui, S, REC, CONF, TRADE, sizing, clientShare, ghostK, attend, confAimTxt, ptLen } from '../engine.svelte.js';
   import { pct, fmtN } from '../format.js';
+  import Section from './Section.svelte';
+  import SizingStrip from './SizingStrip.svelte';
   const d = $derived.by(() => {
     ui.rev; ui.sizing;
     const need = sizing(REC), E = S.ch, share = clientShare(), shared = S.shared && share < 0.999;
@@ -32,8 +34,8 @@
     <td>{fmtN(r.days)}</td><td><b>{r.contract}</b></td></tr>
 {/snippet}
 
-<section class="report" aria-labelledby="szTitle" id="sizeReport">
-  <div class="report-head"><h2 id="szTitle">How many agents do I need?</h2><span class="busy" id="szBasis">{d.basis}</span></div>
+<Section id="headcount" n="2" name="Headcount" title="How many agents do I need?" sub="The smallest roster that hits every target in the brief, after rest days, leave and sickness.">
+  <SizingStrip />
   <div class="sz-grid">
     <div class="tbl" id="szTeams">
       <h3>Recommended headcount by team</h3>
@@ -57,5 +59,5 @@
       {/if}
     </div>
   </div>
-  <p class="foot" id="szFoot">{d.foot}</p>
-</section>
+  <details class="method"><summary>How this is worked out</summary><p class="foot" id="szFoot">{d.foot}</p></details>
+</Section>

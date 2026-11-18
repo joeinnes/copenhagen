@@ -16,10 +16,15 @@ It builds to a single self-contained HTML file (scripts, styles and the simulati
 
 ## Using it
 
-- **Demand & targets:** volumes, handle times, opening hours, intraday and day-of-week patterns, languages, service targets and the contract risk aim.
-- **Desk set-up:** team model, headcount (or match the recommendation), contracts, shrinkage, part-time, shared service and minimum staffing.
-- **Shift schedule:** the optimised rota per day and team, with a CSV export.
-- **Share link:** the whole scenario is encoded into the page's URL fragment.
+The page follows the order you'd work through a bid, with a sticky step bar to jump between steps:
+
+1. **Brief:** a summary of the inputs, with buttons into the three drawers: *Demand* (volumes, hours, languages, patterns), *Service targets* (SLAs, contract risk aim, queue model) and *Staffing* (headcount, shifts, leave, team rules).
+2. **Headcount:** the FTE needed, by team, and the FTE for other call targets.
+3. **SLA risk:** the odds of meeting each target today, this week or this month.
+4. **Rota:** the optimised shifts for each day and team, with a CSV copy.
+5. **Live floor:** play a day, call people in sick, start a major incident and replan.
+
+Name a scenario in the top bar to save it in this browser, or use *Share link* to put the whole set-up in the page's URL fragment.
 
 Settings and saved scenarios live in the browser's local storage.
 
@@ -44,7 +49,7 @@ Every push to `main` runs the unit and browser tests and deploys the build to Gi
 - `src/ui/engine.svelte.js`: the page's state with no markup: the scenario, the recalculation pipeline, the live day and clock, month to date and saved scenarios. Components re-render when its counters in `ui` move (`inputs`, `rev`, `live`, `sizing`, `mc`, `tick`, `scen`).
 - `src/ui/floor.js`: the isometric floor, drawn on a canvas, with its agents, camera and click handling.
 - `src/ui/charts.js`: pure SVG chart builders (data in, markup out).
-- `src/ui/components/`: Svelte 5 components, one per part of the page (top bar, sizing strip, wallboard, floor, reports, drawers, shift schedule, splash), plus small `Num`, `Check` and `Sel` inputs that bind to a scenario setting by path.
+- `src/ui/components/`: Svelte 5 components: one per step of the flow, the three input drawers, the top bar, step bar and splash, plus small `Num`, `Check` and `Sel` inputs that bind to a scenario setting by path.
 - `tests/`: unit tests for the maths, regression tests that pin the model to numbers recorded from the original single-file build (`tests/fixtures/baseline.json`), and browser tests in `tests/e2e/`.
 
 ## Why Copenhagen?

@@ -12,7 +12,7 @@
   const t = $derived(d.need.tot);
 </script>
 
-<section class="sizing" id="sizing" aria-label="Agents needed">
+<div class="sizing" id="sizing" aria-label="Agents needed">
   <div><div class="eyebrow">{d.shared ? "This client's share" : 'Agents needed'}</div><div class="need"><span class="n">{d.headN}</span><span class="u">FTE</span></div></div>
   <div class="facts">
     <div class="fact"><b>{d.both ? `${t.wd} / ${t.we}` : d.need.nWD ? t.wd : t.we}</b><span>rostered per day{d.both ? ', weekdays / weekends' : ''}</span></div>
@@ -28,4 +28,4 @@
     <span>{d.autoSize ? 'Matched to the recommendation' : d.gap > 0 ? d.gap + ' more than needed' : d.gap === 0 ? 'Matches the recommendation' : -d.gap + ' short of the recommendation'}</span>
   </div>
   {#if d.warn.length}<p class="hint" style="grid-column:1/-1;color:var(--bad);margin:0">{d.warn.join(', ')}: the targets can't be met with 9-hour shifts in these opening hours, however many agents are added. Try a longer opening window, a looser target, or a longer email response time.</p>{/if}
-</section>
+</div>

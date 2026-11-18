@@ -5,6 +5,7 @@
   import { clamp } from '../../model';
   import { chartDay, chartWeek, chartMonth, DAY_GEOM } from '../charts.js';
   import Seg from './Seg.svelte';
+  import Section from './Section.svelte';
 
   const NAME = { voice: 'call', chat: 'chat', email: 'email', ticket: 'ticket' };
   // While a period is simulating, the last result stays on screen (as before) under a "Simulating…" note.
@@ -87,11 +88,8 @@
     {#if c === 'good'}<path d="M2 6l3 3 5-6"/>{:else if c === 'warn'}<path d="M6 2v5M6 9.5v.5"/>{:else}<path d="M3 3l6 6M9 3l-6 6"/>{/if}</svg>{pillTxt(p)} likely</span>{/if}
 {/snippet}
 
-<section class="report" aria-labelledby="repTitle">
-  <div class="report-head">
-    <h2 id="repTitle">Will this rota hit target?</h2>
-    <Seg id="repSeg" label="Report period" value={ui.repPeriod} onpick={setRepPeriod} options={[['day', 'Today'], ['week', 'This week'], ['month', 'This month']]} />
-  </div>
+{#snippet period()}<Seg id="repSeg" label="Report period" value={ui.repPeriod} onpick={setRepPeriod} options={[['day', 'Today'], ['week', 'This week'], ['month', 'This month']]} />{/snippet}
+<Section id="risk" n="3" name="SLA risk" title="Will this rota hit target?" sub="The odds of meeting each target, from 500 simulated periods with volume and absence varying." actions={period}>
   {#if busy}<div class="verdict" id="verdict"><span class="busy">Simulating…</span></div>{/if}
   {#if d}
     <div class="scorecard" id="scorecard">
@@ -131,5 +129,5 @@
       </div>
     </div>
   {/if}
-  <p class="foot">Service level follows the contract basis set in Demand &amp; targets: abandoned calls either count as misses or are left out. The queue model is set in Demand &amp; targets: Erlang A models callers hanging up after their patience runs out; Erlang C assumes nobody ever hangs up. Each call card also shows the other model's figure for comparison. The likelihood figures come from 500 simulated periods with daily volumes varying around the forecast by the forecast accuracy you set. Rotas stay as planned in each run.</p>
-</section>
+  <details class="method"><summary>How this is worked out</summary><p class="foot">Service level follows the contract basis set in Demand &amp; targets: abandoned calls either count as misses or are left out. The queue model is set in Demand &amp; targets: Erlang A models callers hanging up after their patience runs out; Erlang C assumes nobody ever hangs up. Each call card also shows the other model's figure for comparison. The likelihood figures come from 500 simulated periods with daily volumes varying around the forecast by the forecast accuracy you set. Rotas stay as planned in each run.</p></details>
+</Section>
