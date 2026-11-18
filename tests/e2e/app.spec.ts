@@ -90,8 +90,7 @@ test.describe('demand and targets', () => {
     await page.locator('#openTargets').click();
     await page.locator('#modelSeg button[data-v="C"]').click();
     await page.keyboard.press('Escape');
-    await settled(page);
-    expect(Number(await headline(page).textContent())).toBeGreaterThan(a);
+    await expect.poll(async () => Number(await headline(page).textContent()), { timeout: 30_000 }).toBeGreaterThan(a);
     await expect(page.locator('.brand')).toContainText('Erlang C');
   });
 

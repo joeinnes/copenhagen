@@ -95,7 +95,7 @@ export function updateAgents(dt){
 }
 
 /* ============ floor drawing ============ */
-let cv=null,floorEl=null,ctxMain=null,ctx=null,bgKey='',layoutVer=0;const bgCv=document.createElement('canvas');
+let cv=null,floorEl=null,ctxMain=null,ctx=null,bgKey='',layoutVer=0,onScreen=true;const bgCv=document.createElement('canvas');
 let CAM={z:1,x:0,y:0};
 function resize(){if(!cv)return;const w=cv.clientWidth||floorEl.clientWidth,dpr=Math.min(2,window.devicePixelRatio||1);
   cv.width=Math.round(w*dpr);cv.height=Math.round(w*L.LH/L.LW*dpr);cv.style.height=(w*L.LH/L.LW)+'px';clampCam()}
@@ -458,7 +458,8 @@ function drawSign(sg){const [x,y]=P(sg.gx,sg.gy),[,y2]=P(sg.gx,sg.gy,40);blob(x,
   ctx.fillStyle=lg(0,y2-32,0,y2-2,[[0,'#2E3C4E'],[1,'#1E2836']]);rr(x-w/2,y2-32,w,30,5);ctx.fill();ctx.strokeStyle='#F2D27A';ctx.lineWidth=1.5;ctx.stroke();
   ctx.fillStyle='#F7F1E1';ctx.textAlign='center';ctx.fillText(l1,x,y2-19);ctx.fillStyle='#F2D27A';ctx.font='600 9px JetBrains Mono, monospace';ctx.fillText(l2,x,y2-8)}
 export function drawScene(t){
-  if(!cv)return;
+  // nothing to draw while the floor is scrolled away or the tab is hidden; agents keep moving in updateAgents
+  if(!cv||!onScreen||document.hidden)return;
   ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#1C2128';ctx.fillRect(0,0,cv.width,cv.height);
   const k=cv.width/L.LW*CAM.z,key=[cv.width,cv.height,layoutVer,CAM.z.toFixed(3),CAM.x.toFixed(1),CAM.y.toFixed(1),Math.floor(simMin()/5)].join('|');
   if(key!==bgKey){bgKey=key;bgCv.width=cv.width;bgCv.height=cv.height;ctx=bgCv.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,bgCv.width,bgCv.height);
@@ -484,6 +485,7 @@ export function attachFloor(canvas,el){
   cv=canvas;floorEl=el;ctxMain=ctx=cv.getContext('2d');
   const offs=[],on=(t,f,o)=>{cv.addEventListener(t,f,o);offs.push(()=>cv.removeEventListener(t,f,o))};
   const onResize=()=>resize();window.addEventListener('resize',onResize);offs.push(()=>window.removeEventListener('resize',onResize));
+  if(typeof IntersectionObserver!=='undefined'){const io=new IntersectionObserver(es=>{onScreen=es[es.length-1].isIntersecting});io.observe(cv);offs.push(()=>io.disconnect())}
   on('pointerdown',e=>{const rc=cv.getBoundingClientRect();PTR.set(e.pointerId,[e.clientX-rc.left,e.clientY-rc.top]);
   if(PTR.size===1){downAt={x:e.clientX,y:e.clientY,cx:CAM.x,cy:CAM.y,moved:false};if(CAM.z>1.01)cv.setPointerCapture(e.pointerId)}
   if(PTR.size===2){const [a,b]=[...PTR.values()];pinch0={d:Math.hypot(a[0]-b[0],a[1]-b[1]),z:CAM.z};downAt&&(downAt.moved=true)}});

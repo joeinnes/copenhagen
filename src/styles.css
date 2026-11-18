@@ -99,7 +99,7 @@ button,input,select{font:inherit;color:inherit}
 .floor{position:relative;border-radius:10px;overflow:hidden;background:#1C2128;border:1px solid var(--line)}
 .floor canvas{display:block;width:100%;cursor:pointer}
 .zoom{position:absolute;top:calc(10px + 0px);right:10px;display:flex;gap:4px;z-index:4}
-.zoom .btn{padding:4px 10px;background:rgba(28,33,40,.75);color:#fff;border-color:rgba(255,255,255,.2);backdrop-filter:blur(4px)}
+.zoom .btn{padding:4px 10px;background:rgba(28,33,40,.85);color:#fff;border-color:rgba(255,255,255,.2)}
 .zoom .btn:hover{border-color:#fff}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink-2);padding:2px 2px 0}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
@@ -275,7 +275,7 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
 
 /* step bar: sticky under the top bar; the band above it (under the phone's status bar) is painted to match */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:13;background:var(--bg)}
-.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:12;margin-inline:-4px;padding:6px 4px;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:12;margin-inline:-4px;padding:6px 4px;background:var(--bg);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .steps ol{list-style:none;margin:0;padding:0;display:flex;gap:2px;min-width:max-content}
 .steps button{display:inline-flex;align-items:center;gap:8px;border:0;background:none;padding:6px 12px 6px 6px;border-radius:999px;font-weight:600;font-size:13px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
 .steps button:hover{background:var(--panel);color:var(--ink)}

@@ -217,12 +217,20 @@ export function changed(what,light){
   if(what==='hc')S.autoSize=false;else if(!['autoSize','fcErr','name'].includes(what))needRec=true;
   save();ui.scen++;ui.inputs++;clearTimeout(tChange);tChange=setTimeout(()=>recompute(),light?220:60);
 }
+// Recalculation runs in two slices with a frame in between (sizing, then rotas and the live day),
+// so the floor keeps moving while the model works. A newer change abandons an older one between slices.
+let recGen=0;
 function recompute(){
   if(needRec)ROTA_PLAIN=false;
   freshCtx();
+  const g=++recGen;
   if(needRec){const r=M.computeRec(C());REC0=r.rec;MINH=r.minh;REC_WARN=new Set(r.warn);
     REC=S.confOn&&CONF.f?M.scaleRec(C(),REC0,MINH,CONF.f):REC0;needRec=false;startTrade();
-    if(S.confOn)startConf();else{CONF.gen++;CONF.busy=false;CONF.p=null;CONF.f=1}}
+    if(S.confOn)startConf();else{CONF.gen++;CONF.busy=false;CONF.p=null;CONF.f=1}
+    ui.sizing++;setTimeout(()=>{if(g===recGen)finishRecompute()},0);return}
+  finishRecompute();
+}
+function finishRecompute(){
   for(const t of getTeams())if(S.autoSize||!S.hc[t.id]||typeof S.hc[t.id]!=='object')S.hc[t.id]={...(REC[t.id]||{wd:0,we:0})};
   EV=new Map();computePlans();if(simReset){simReset=false;doSimReset()}else resetLive(!rerollAbsence);rerollAbsence=false;
   evalLive();buildMTD();F.buildLayout();ui.rev++;ui.live++;ui.inputs++;scheduleMC();save();

@@ -33,7 +33,7 @@ export function meetsTargets(ctx: Ctx, team: Team, d: number, cov: ArrayLike<num
 const shortfall = (req: ArrayLike<number>, cov: ArrayLike<number>) => { let s = 0; for (let i = 0; i < 48; i++) s += Math.max(0, req[i] - cov[i]); return s / 2; };
 
 /** Preference strengths tried in turn when looking for a more sociable rota (see startPenalty). */
-const PREF_STEPS = [8, 4, 2, 1];
+const PREF_STEPS = [4, 1];
 /** Where a night start goes instead: later into the morning first (06:00–07:00), then earlier into the evening (21:00–22:30). */
 const NIGHT_MOVES = [12, 13, 14, 45, 44, 43, 42];
 /**
@@ -50,9 +50,13 @@ export function planDay(ctx: Ctx, team: Team, d: number, H: number): number[] {
   if (ctx.plainPlans || ctx.S.shiftPrefs === false || !base.length || !planPenalty(base)) return base;
   const cov0 = coverage(ctx, base).on, cover0 = coverOK(ctx, team, d, cov0), meets0 = meetsTargets(ctx, team, d, cov0);
   const maxShort = shortfall(req, cov0) * 1.05 + 0.5;
+  let targetChecks = 0;
+  // cheap checks first; the target check runs the queue maths for the whole day, so it goes last and is counted
   const passes = (p: number[]) => {
     const cov = coverage(ctx, p).on;
-    return (!cover0 || coverOK(ctx, team, d, cov)) && shortfall(req, cov) <= maxShort && (!meets0 || meetsTargets(ctx, team, d, cov));
+    if ((cover0 && !coverOK(ctx, team, d, cov)) || shortfall(req, cov) > maxShort) return false;
+    targetChecks++;
+    return !meets0 || meetsTargets(ctx, team, d, cov);
   };
   let best = base;
   for (const pref of PREF_STEPS) {
@@ -63,10 +67,12 @@ export function planDay(ctx: Ctx, team: Team, d: number, H: number): number[] {
   for (let k = 0; k < best.length; k++) {
     if (!isNightStart(best[k])) continue;
     const kind = best[k] - shS(best[k]);
+    targetChecks = 0;
     for (const s of NIGHT_MOVES) {
       if (!al.includes(s)) continue;
       const trial = best.slice(); trial[k] = kind + s;
       if (passes(trial)) { best = trial; break; }
+      if (targetChecks >= 2) break; // this start is holding up a target; leave it and move on
     }
   }
   return best.sort((x, y) => x - y);
