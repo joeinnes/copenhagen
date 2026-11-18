@@ -56,6 +56,19 @@ test.describe('wallboard', () => {
     for (let k = 0; k < 6; k++) { await page.waitForTimeout(500); expect(await sizes()).toBe(first); }
   });
 
+  test('call counts in the thousands fit their columns', async ({ page }) => {
+    await open(page);
+    await page.locator('#openDemand').click();
+    await page.locator('#vVol').fill('84000');
+    await page.keyboard.press('Escape');
+    await settled(page);
+    await setClock(page, 23 * 60);
+    const calls = wallboardCell(page, 'Calls today');
+    await expect(calls.locator('.wb-val').first()).toHaveText(/\d,\d{3}/);
+    const clipped = await calls.locator('.wb-trio .wb-val').evaluateAll((els) => els.filter((e) => e.scrollWidth > e.clientWidth + 1).map((e) => e.textContent));
+    expect(clipped).toEqual([]);
+  });
+
   test('major incident: start, wind down, cancel', async ({ page }) => {
     await open(page);
     await settled(page);

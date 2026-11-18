@@ -346,7 +346,8 @@ details.method .foot{margin-top:6px}
 .wb-sub>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .wb-sub b{font-weight:inherit}
 .wb-cell>.wb-sub{min-height:calc(2 * 1.35em)}
-.wb-trio{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 10px}
+/* each column reserves seven LED characters ("888,888"); as many columns as fit, set by the cell's width alone */
+.wb-trio{display:grid;font-family:var(--f-led);font-size:26px;grid-template-columns:repeat(auto-fill,minmax(calc(7ch + 6px),1fr));gap:4px 10px}
 .wb-trio>div{min-width:0}
 .wb-trio .wb-sub{min-height:0}
 .wb-agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:2px 10px}
