@@ -322,3 +322,12 @@ details.method .foot{margin-top:6px}
 .clock select{width:auto}
 .gantt-scroll{overflow:auto;max-height:440px;overscroll-behavior:contain}
 @media (max-width:600px){.scen input{flex:1 1 100%}.scen .help{margin-left:auto}}
+/* live floor: on wide screens the wallboard sits beside the floor so the room is in the first screenful; stacked (board first) below that */
+.stage{display:grid;gap:14px;grid-template-areas:"board" "floor"}
+.stage>.wallboard{grid-area:board;min-width:0}
+.stage>.floor-wrap{grid-area:floor;min-width:0}
+@media (min-width:1180px){
+  .stage{grid-template-columns:minmax(0,1fr) 340px;grid-template-areas:"floor board";align-items:start}
+  .stage .wb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stage .wb-val{font-size:27px}
+}

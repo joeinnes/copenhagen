@@ -20,11 +20,11 @@
 <div class="app">
   <TopBar />
   <StepNav />
+  <LiveFloor />
   <Brief />
   <SizeReport />
   <RiskReport />
   <ShiftSchedule />
-  <LiveFloor />
 </div>
 
 <div class="scrim" id="scrim" role="presentation" hidden={!(ui.drawer || ui.splash)} onclick={() => { setDrawer(null); closeSplash(); }}></div>

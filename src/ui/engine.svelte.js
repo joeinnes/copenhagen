@@ -341,7 +341,8 @@ export function resetAll(){
 {const r=M.computeRec(C());REC0=r.rec;MINH=r.minh;REC_WARN=new Set(r.warn);REC=REC0;needRec=false;}
 for(const t of getTeams())if(S.autoSize||!S.hc[t.id]||typeof S.hc[t.id]!=='object')S.hc[t.id]={...(REC[t.id]||{wd:0,we:0})};
 computePlans();resetLive(false);evalLive();buildMTD();F.buildLayout();
-{let off=false;try{off=localStorage.getItem('copenhagen.splash')==='off'}catch(e){}ui.splash=!off}
+// The welcome splash shows on a first visit, but not when the page is opened from a shared scenario link: then the live floor is the point.
+{let off=false;try{off=localStorage.getItem('copenhagen.splash')==='off'}catch(e){}ui.splash=!off&&!/^#cfg-/.test(location.hash)}
 
 /** Start the background work and the animation loop. Returns a function that stops the loop. */
 export function start(){

@@ -35,7 +35,7 @@
   }
 </script>
 
-<Section id="rota" n="4" name="Rota" title="When does everyone work?" sub="The optimised shift pattern for each day, and how well it covers the requirement.">
+<Section id="rota" n="5" name="Rota" title="When does everyone work?" sub="The optimised shift pattern for each day, and how well it covers the requirement.">
   <div id="shifts" class="rota">
     <div class="inline" style="justify-content:space-between;gap:10px">
       <Seg id="shDay" label="Day" value={day} onpick={(x) => (day = +x)} options={DOW.map((n, i) => [i, n])} disabledFn={(i) => !v.openDays[i]} />

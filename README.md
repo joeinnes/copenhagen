@@ -16,13 +16,13 @@ It builds to a single self-contained HTML file (scripts, styles and the simulati
 
 ## Using it
 
-The page follows the order you'd work through a bid, with a sticky step bar to jump between steps:
+The page opens on the live floor, then follows the order you'd work through a bid. A sticky step bar jumps between steps:
 
-1. **Brief:** a summary of the inputs, with buttons into the three drawers: *Demand* (volumes, hours, languages, patterns), *Service targets* (SLAs, contract risk aim, queue model) and *Staffing* (headcount, shifts, leave, team rules).
-2. **Headcount:** the FTE needed, by team, and the FTE for other call targets.
-3. **SLA risk:** the odds of meeting each target today, this week or this month.
-4. **Rota:** the optimised shifts for each day and team, with a CSV copy.
-5. **Live floor:** play a day, call people in sick, start a major incident and replan.
+1. **Live floor:** play a day, call people in sick, start a major incident and replan.
+2. **Brief:** a summary of the inputs, with buttons into the three drawers: *Demand* (volumes, hours, languages, patterns), *Service targets* (SLAs, contract risk aim, queue model) and *Staffing* (headcount, shifts, leave, team rules).
+3. **Headcount:** the FTE needed, by team, and the FTE for other call targets.
+4. **SLA risk:** the odds of meeting each target today, this week or this month.
+5. **Rota:** the optimised shifts for each day and team, with a CSV copy.
 
 Name a scenario in the top bar to save it in this browser, or use *Share link* to put the whole set-up in the page's URL fragment.
 

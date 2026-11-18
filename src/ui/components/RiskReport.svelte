@@ -89,7 +89,7 @@
 {/snippet}
 
 {#snippet period()}<Seg id="repSeg" label="Report period" value={ui.repPeriod} onpick={setRepPeriod} options={[['day', 'Today'], ['week', 'This week'], ['month', 'This month']]} />{/snippet}
-<Section id="risk" n="3" name="SLA risk" title="Will this rota hit target?" sub="The odds of meeting each target, from 500 simulated periods with volume and absence varying." actions={period}>
+<Section id="risk" n="4" name="SLA risk" title="Will this rota hit target?" sub="The odds of meeting each target, from 500 simulated periods with volume and absence varying." actions={period}>
   {#if busy}<div class="verdict" id="verdict"><span class="busy">Simulating…</span></div>{/if}
   {#if d}
     <div class="scorecard" id="scorecard">

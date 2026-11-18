@@ -199,6 +199,8 @@ test.describe('scenarios', () => {
     const hash = await page.evaluate(() => location.hash);
     const p2 = await context.newPage();
     await p2.goto('/' + hash);
+    await expect(p2.locator('#splash')).toBeHidden();
+    await expect(p2.locator('#live')).toBeInViewport();
     await expect(p2.locator('#scName')).toHaveValue('Acme bid');
     await expect(p2.locator('#vVol')).toHaveValue('12345');
   });

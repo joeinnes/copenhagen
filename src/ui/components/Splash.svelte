@@ -15,11 +15,11 @@
   <div id="spStart" hidden={tab !== 'start'}>
   <p class="sp-lede">Enter the volumes you expect and the service you're promising. Copenhagen works out the headcount, builds the rota, and plays out a day on the floor so you can see whether it holds.</p>
   <ol class="sp-steps">
-    <li><b>Fill in the brief</b><span>Edit <em>Demand</em> (volumes, hours, languages), <em>Service targets</em> (what you're selling and how much risk you'll accept) and <em>Staffing</em> (shifts, leave, team rules). The page opens with an example desk, so you can explore before changing anything.</span></li>
+    <li><b>Watch the live floor</b><span>The page opens on an example desk playing out its day. Send people home sick, start a major incident, then replan and watch the wallboard.</span></li>
+    <li><b>Fill in the brief</b><span>Edit <em>Demand</em> (volumes, hours, languages), <em>Service targets</em> (what you're selling and how much risk you'll accept) and <em>Staffing</em> (shifts, leave, team rules).</span></li>
     <li><b>Read the headcount</b><span>The FTE you need, after rest days, leave and sickness, split by team, with the FTE for other call targets beside it. It's also pinned in the step bar as you scroll.</span></li>
     <li><b>Check the SLA risk</b><span>The odds of meeting each target today, this week or this month.</span></li>
     <li><b>Review the rota</b><span>Optimised start times for each day, with a CSV copy for the workforce team.</span></li>
-    <li><b>Stress-test it on the live floor</b><span>Play the day, send people home sick, start a major incident, then replan and watch the wallboard.</span></li>
   </ol>
   <p class="hint">Name the scenario at the top to save it in this browser, or choose <em>Share link</em> to put the whole set-up in the page link.</p>
   </div>

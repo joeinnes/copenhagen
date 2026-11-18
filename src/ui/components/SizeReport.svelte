@@ -34,7 +34,7 @@
     <td>{fmtN(r.days)}</td><td><b>{r.contract}</b></td></tr>
 {/snippet}
 
-<Section id="headcount" n="2" name="Headcount" title="How many agents do I need?" sub="The smallest roster that hits every target in the brief, after rest days, leave and sickness.">
+<Section id="headcount" n="3" name="Headcount" title="How many agents do I need?" sub="The smallest roster that hits every target in the brief, after rest days, leave and sickness.">
   <SizingStrip />
   <div class="sz-grid">
     <div class="tbl" id="szTeams">

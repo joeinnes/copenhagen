@@ -1,5 +1,5 @@
 <script>
-  // Step 1: what the desk has to handle and what you're promising, in one glance, with a way into each set of inputs.
+  // Step 2: what the desk has to handle and what you're promising, in one glance, with a way into each set of inputs.
   import { ui, S, CH, CHN, DOW, weeklyVol, activeLangs, langFrac, confAimTxt, ghostK, setDrawer } from '../engine.svelte.js';
   import { fmtN, mss } from '../format.js';
   import Section from './Section.svelte';
@@ -39,7 +39,7 @@
   });
 </script>
 
-<Section id="brief" n="1" name="Brief" title="What does the desk have to handle?" sub="The givens and the promises. Change anything here and the rest of the page updates.">
+<Section id="brief" n="2" name="Brief" title="What does the desk have to handle?" sub="The givens and the promises. Change anything here and the rest of the page updates.">
   <div class="brief">
     <article class="bcard">
       <header><h3>Demand</h3><span class="hint">The givens</span></header>

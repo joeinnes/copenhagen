@@ -1,5 +1,5 @@
 <script>
-  // Step 5: play a day on the floor. The clock, speed, incident and absence controls all live here, next to what they change.
+  // Step 1: play a day on the floor. The clock, speed, incident and absence controls all live here, next to what they change.
   import { ui, DOW, live, simMin, incidentOn, setDow, setClock, toggleIncident, callSick, replanNow, resetToday, backToWork } from '../engine.svelte.js';
   import { AG } from '../floor.js';
   import { hhmm } from '../format.js';
@@ -17,7 +17,7 @@
     return { sick: [...live.sick].map((k) => ({ k, name: AG.get(k)?.p.name })).filter((x) => x.name), leave: live.leave.size, replanned: live.replanned }; });
 </script>
 
-<Section id="live" n="5" name="Live floor" title="Does it hold up on the day?" sub="Play a day through. Send people home sick or start a major incident, then replan and watch the wallboard.">
+<Section id="live" n="1" name="Live floor" title="A day on the desk" sub="This scenario playing out live. Send people home sick or start a major incident, then replan and watch the wallboard.">
   <div class="toolbar" role="group" aria-label="Simulation">
     <div class="tb-group">
       <div class="clock">
@@ -42,6 +42,8 @@
     {:else}<span class="hint">Nobody is off sick.</span>{/each}
     <span class="hint">{today.leave} on annual leave today.{today.replanned ? " Shifts that hadn't started were replanned around today's absence." : ''} Click an agent to send them home.</span>
   </div>
-  <Wallboard />
-  <Floor />
+  <div class="stage">
+    <Floor />
+    <Wallboard />
+  </div>
 </Section>

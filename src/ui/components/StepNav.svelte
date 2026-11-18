@@ -3,8 +3,8 @@
   // page link's # part carries shared scenarios.
   import { onMount } from 'svelte';
   import { ui, S, REC, CONF, sizing, clientShare } from '../engine.svelte.js';
-  const STEPS = [['brief', 'Brief'], ['headcount', 'Headcount'], ['risk', 'SLA risk'], ['rota', 'Rota'], ['live', 'Live floor']];
-  let cur = $state('brief');
+  const STEPS = [['live', 'Live floor'], ['brief', 'Brief'], ['headcount', 'Headcount'], ['risk', 'SLA risk'], ['rota', 'Rota']];
+  let cur = $state('live');
   const fte = $derived.by(() => { ui.rev; ui.sizing; const n = sizing(REC).tot.contract, sh = clientShare();
     return CONF.busy ? '…' : S.shared && sh < 0.999 ? (n * sh).toFixed(1) : String(n); });
   function go(id) { document.getElementById(id)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
