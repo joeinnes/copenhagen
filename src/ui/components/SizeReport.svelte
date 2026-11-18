@@ -19,8 +19,9 @@
         return { x, f, d: dd, cur: p === E.voice.slPct && x === E.voice.slSec };
       }) })) };
     }
-    return { need, basis, shared, voiceOn: E.voice.on, trade, confOn: S.confOn, ptOn: S.ptOn, ptFte: (ptLen() / 2 / 8).toFixed(2).replace(/0$/, ''),
-      foot: `Sized on the busiest weekday and the busiest weekend day, each with its own optimised rota of 4h on, 1h lunch, 4h on. On-shift numbers allow ${S.shrink}% shrinkage. Each agent takes ${S.alDays} days' annual leave and ${S.sickDays} sick days a year, so on any day each rostered agent has a ${pct(1 - attend(), 1)} chance of being away; rosters are sized up to cover that, and the ~ figures show who is typically in. FTE is agent-days ÷ 5. Each language team is sized on its own; spare language agents helping with English is a bonus on top.` };
+    const longH = S.weLong ? S.weLongHours || 12 : 0;
+    return { need, basis, shared, voiceOn: E.voice.on, trade, confOn: S.confOn, ptOn: S.ptOn, longH, ptFte: (ptLen() / 2 / 8).toFixed(2).replace(/0$/, ''),
+      foot: `Sized on the busiest weekday and the busiest weekend day, each with its own optimised rota of ${longH ? `4h on, 1h lunch, 4h on (weekdays) and ${longH}-hour shifts (weekends)` : '4h on, 1h lunch, 4h on'}. On-shift numbers allow ${S.shrink}% shrinkage. Each agent takes ${S.alDays} days' annual leave and ${S.sickDays} sick days a year, so on any day each rostered agent has a ${pct(1 - attend(), 1)} chance of being away; rosters are sized up to cover that, and the ~ figures show who is typically in. ${longH ? `FTE is paid hours ÷ 40: a weekday shift pays 8 hours and a weekend shift ${longH}.` : 'FTE is agent-days ÷ 5.'} Each language team is sized on its own; spare language agents helping with English is a bonus on top.` };
   });
 </script>
 
@@ -36,7 +37,7 @@
   <div class="sz-grid">
     <div class="tbl" id="szTeams">
       <h3>Recommended headcount by team</h3>
-      <p class="hint" style="margin-bottom:8px">Agents rostered per day, including cover for leave and sickness, then FTE at 5 days in 7{d.ptOn ? `, with part-timers counting ${d.ptFte} FTE` : ''}.</p>
+      <p class="hint" style="margin-bottom:8px">Agents rostered per day, including cover for leave and sickness, then FTE at {d.longH ? `paid hours ÷ 40, with ${d.longH}-hour weekend shifts` : '5 days in 7'}{d.ptOn ? `, with part-timers counting ${d.ptFte} FTE` : ''}.</p>
       <table><tbody>
         <tr><th>Team</th>{#if d.need.nWD}<th>Mon–Fri <span style="text-transform:none">(in)</span></th>{/if}{#if d.need.nWE}<th>Sat–Sun <span style="text-transform:none">(in)</span></th>{/if}<th>Agent-days / wk</th><th>FTE needed</th></tr>
         {#each d.need.rows as r}{@render row(r.t.label, r)}{/each}

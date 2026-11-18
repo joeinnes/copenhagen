@@ -65,14 +65,14 @@ const SH_W = 940, SH_PL = 150, SH_PR = 10;
 function segs(a, b) { const out = [], len = b - a; a = ((a % 1440) + 1440) % 1440; b = a + len; if (b <= 1440) out.push([a, b]); else { out.push([a, 1440]); out.push([0, b - 1440]); } return out; }
 
 /** Shift schedule: one row per start time, bar per working block. */
-export function shiftGantt({ groups, multiTeam, shS, shPT, shSegs, shLabel }) {
+export function shiftGantt({ groups, multiTeam, shS, shKind, shSegs, shLabel, shDesc }) {
   const W = SH_W, pl = SH_PL, pr = SH_PR, top = 22, rh = 22, H = top + Math.max(1, groups.length) * rh + 6, x = (m) => pl + (W - pl - pr) * m / 1440, mxN = Math.max(1, ...groups.map((z) => z.n)); let g = '';
   for (let h = 0; h <= 24; h += 2) g += `<line class="grid" x1="${x(h * 60)}" x2="${x(h * 60)}" y1="${top - 4}" y2="${H}"/><text class="ax" x="${x(h * 60)}" y="12" text-anchor="middle">${String(h % 24).padStart(2, '0')}:00</text>`;
   groups.forEach((o, r) => {
-    const y = top + r * rh + 3, s0 = shS(o.s) * 30, pt = shPT(o.s), bh = rh - 7, br = Object.entries(o.by).map(([k, v]) => `${k} ${v}`).join(', ');
-    g += `<g><title>${pt ? 'Part-time ' + shLabel(o.s) : `${hhmm(s0)}–${hhmm(s0 + 540)}, lunch ${hhmm(s0 + 240)}–${hhmm(s0 + 300)}`}: ${o.n} agent${o.n > 1 ? 's' : ''}${multiTeam ? ' (' + br + ')' : ''}</title>`;
+    const y = top + r * rh + 3, kind = shKind(o.s), bh = rh - 7, br = Object.entries(o.by).map(([k, v]) => `${k} ${v}`).join(', ');
+    g += `<g><title>${shDesc(o.s)}: ${o.n} agent${o.n > 1 ? 's' : ''}${multiTeam ? ' (' + br + ')' : ''}</title>`;
     g += `<rect x="0" y="${y - 2}" width="${W}" height="${rh - 2}" fill="transparent"/>`;
-    g += `<text class="lbl" x="0" y="${y + bh - 3}">${shLabel(o.s)}${pt ? ' PT' : ''}</text><text class="ax" x="${pl - 8}" y="${y + bh - 3}" text-anchor="end" style="font-weight:600">×${o.n}</text>`;
+    g += `<text class="lbl" x="0" y="${y + bh - 3}">${shLabel(o.s)}${kind === 1 ? ' PT' : kind === 2 ? ' L' : ''}</text><text class="ax" x="${pl - 8}" y="${y + bh - 3}" text-anchor="end" style="font-weight:600">×${o.n}</text>`;
     for (const [a, b, lun] of shSegs(o.s)) for (const [p, q] of segs(a, b))
       g += `<rect x="${x(p) + (lun ? 0 : 1)}" y="${y}" width="${Math.max(1, x(q) - x(p) - (lun ? 0 : 2))}" height="${bh}" rx="${lun ? 0 : 3}" fill="${lun ? 'var(--muted)' : 'var(--accent)'}" opacity="${lun ? 0.35 : 0.35 + 0.65 * o.n / mxN}"/>`;
     g += '</g>';

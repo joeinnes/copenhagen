@@ -9,8 +9,8 @@ It builds to a single self-contained HTML file (scripts, styles and the simulati
 - **Queues:** Erlang A (callers abandon when their patience runs out) or Erlang C, in 48 half-hour intervals.
 - **Channels:** calls, chats (several at once per agent) and two deferred channels, emails and self-service tickets, worked from a backlog in agents' spare time.
 - **Teams:** blended or dedicated, with up to three languages. English is the shared language; spare language agents can help with English.
-- **Shifts:** full 9-hour shifts (4 on, 1-hour lunch, 4 on) starting on any half hour, including overnight; optional part-time shifts. A greedy optimiser places them against each day's forecast.
-- **Headcount:** 5 days in 7, annual leave and sickness rolled at random, shrinkage on shift, and a minimum staffing rule (at least 2 on seat whenever open, at least 3 people per team).
+- **Shifts:** full 9-hour shifts (4 on, 1-hour lunch, 4 on) starting on any half hour, including overnight; optional part-time shifts, and optional long (10 to 12-hour) weekend shifts. A greedy optimiser places them against each day's forecast.
+- **Headcount:** 5 days in 7 (FTE is paid hours ÷ 40, so two 12-hour weekend shifts and two weekdays make one FTE), annual leave and sickness rolled at random, shrinkage on shift, and a minimum staffing rule (at least 2 on seat whenever open, at least 3 people per team).
 - **Shared service:** other clients' contacts join the queues as "ghost" contacts, and the client's share of the pool is reported.
 - **Risk:** 500 simulated months (or weeks) with forecast error and absence, used both to report the odds of hitting each SLA and to size the team to a contract-level aim such as "at most 1 missed month in an 84-month (5 + 1 + 1) contract".
 

@@ -1,6 +1,6 @@
 <script>
   // The shift schedule: optimal start times for a day, cover against the requirement, and a CSV copy.
-  import { ui, S, DOW, PLAN, live, getTeams, teamReq, coverage, shS, shPT, shMins, shSegs, shLabel, ptLen, closeShifts } from '../engine.svelte.js';
+  import { ui, S, DOW, PLAN, live, getTeams, teamReq, coverage, shS, shPT, shKind, shMins, shSegs, shLabel, shDesc, ptLen, closeShifts } from '../engine.svelte.js';
   import { pct, hhmm } from '../format.js';
   import { shiftGantt, shiftCover } from '../charts.js';
   import Seg from './Seg.svelte';
@@ -20,16 +20,16 @@
     const reqH = req.reduce((a, b) => a + b, 0) / 2, onH = on.reduce((a, b) => a + b, 0) / 2, under = req.reduce((a, r, i) => a + Math.max(0, r - on[i]), 0) / 2;
     const starts = groups.map((x) => shS(x.s) * 30);
     return { teams, sel, groups, tot, openDays: S.openDays.slice(), shrink: S.shrink,
-      sub: `The optimal start times for ${DOW[day]}'s forecast with ${tot} agents on shift. Full-time shifts are 4 hours on, a 1-hour lunch, then 4 hours on${S.ptOn ? `; part-time (PT) shifts are ${ptLen() / 2} hours with no lunch` : ''}.`,
+      sub: `The optimal start times for ${DOW[day]}'s forecast with ${tot} agents on shift. ${S.weLong && day >= 5 ? `Full-time agents work ${S.weLongHours || 12}-hour (L) shifts today, with breaks covered by shrinkage` : 'Full-time shifts are 4 hours on, a 1-hour lunch, then 4 hours on'}${S.ptOn ? `; part-time (PT) shifts are ${ptLen() / 2} hours with no lunch` : ''}.`,
       range: groups.length ? hhmm(Math.min(...starts)) + ' – ' + hhmm(Math.max(...starts)) : '–', need: onH ? pct(reqH / onH, 0) : '–', under: under.toFixed(1),
-      gantt: shiftGantt({ groups, multiTeam: sel.length > 1, shS, shPT, shSegs, shLabel }), cover: shiftCover(req, on) };
+      gantt: shiftGantt({ groups, multiTeam: sel.length > 1, shS, shKind, shSegs, shLabel, shDesc }), cover: shiftCover(req, on) };
   });
 
   async function copy() {
     const rows = [['Day', 'Team', 'Type', 'Start', 'End', 'Lunch start', 'Lunch end', 'Agents']];
     for (const t of v.sel) {
       const m = new Map(); for (const st of PLAN[day]?.[t.id] || []) m.set(st, (m.get(st) || 0) + 1);
-      for (const [st, n] of [...m].sort((a, b) => a[0] - b[0])) { const s0 = shS(st) * 30, pt = shPT(st); rows.push([DOW[day], t.label, pt ? 'Part-time' : 'Full-time', hhmm(s0), hhmm(s0 + shMins(st)), pt ? '' : hhmm(s0 + 240), pt ? '' : hhmm(s0 + 300), n]); }
+      for (const [st, n] of [...m].sort((a, b) => a[0] - b[0])) { const s0 = shS(st) * 30, k = shKind(st); rows.push([DOW[day], t.label, ['Full-time', 'Part-time', `${shMins(st) / 60}-hour`][k], hhmm(s0), hhmm(s0 + shMins(st)), k ? '' : hhmm(s0 + 240), k ? '' : hhmm(s0 + 300), n]); }
     }
     try { await navigator.clipboard.writeText(rows.map((r) => r.join(',')).join('\n')); copyTxt = 'Copied'; } catch (e) { copyTxt = 'Copy failed'; }
     setTimeout(() => (copyTxt = 'Copy as CSV'), 1600);

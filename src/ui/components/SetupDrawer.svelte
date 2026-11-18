@@ -99,6 +99,12 @@
       <p class="hint">Part-timers fill the peaks without paying for a full day. A 4-hour part-timer counts as half an FTE.</p>
     </section>
     <section class="grp">
+      <h3>Long weekend shifts</h3>
+      <label class="inline"><Check k="weLong" id="weLong" /> Full-time agents work long shifts at weekends</label>
+      <div class="inline">Weekend shifts last <Sel k="weLongHours" id="weLongHours" style="width:auto"><option value="10">10 hours</option><option value="11">11 hours</option><option value="12">12 hours</option></Sel></div>
+      <p class="hint">For example 08:00–20:00 and 20:00–08:00. Two 12-hour weekend shifts and two 8-hour weekdays make a 40-hour week, so FTE counts paid hours ÷ 40. Breaks during the shift come out of shrinkage. Usually cheaper for flat round-the-clock cover; peaky demand can cost more, so try both.</p>
+    </section>
+    <section class="grp">
       <h3>Shared service</h3>
       <label class="inline"><Check k="shared" id="shared" /> Agents are shared with other clients</label>
       <div class="inline">Clients sharing the agents <Num k="clients" id="clients" min="2" max="10" step="1" /></div>
@@ -106,7 +112,7 @@
     </section>
     <section class="grp">
       <h3>Shift pattern</h3>
-      <p class="hint">Every full-time shift is the full 9 hours: 4 hours on, a 1-hour lunch, then 4 hours on. Shifts can start on any half hour and may run past midnight into the next day. Each day's rota is optimised against that day's forecast. Opening hours can also run past midnight, for example 18:00 to 06:00.</p>
+      <p class="hint">Every full-time shift is the full 9 hours: 4 hours on, a 1-hour lunch, then 4 hours on, unless long weekend shifts are on. Shifts can start on any half hour and may run past midnight into the next day. Each day's rota is optimised against that day's forecast. Opening hours can also run past midnight, for example 18:00 to 06:00.</p>
     </section>
   </div>
 </aside>

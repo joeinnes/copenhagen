@@ -142,6 +142,21 @@ test.describe('report and schedule', () => {
     await expect(page.locator('#cards .mcard')).toHaveCount(5);
   });
 
+  test('long weekend shifts show as 12-hour shifts on Saturday only', async ({ page }) => {
+    await open(page);
+    await settled(page);
+    await page.locator('#openSetup').click();
+    await page.locator('#weLong').check();
+    await page.keyboard.press('Escape');
+    await settled(page);
+    await page.locator('#openShifts').click();
+    await page.locator('#shDay button[data-v="5"]').click();
+    await expect(page.locator('#shSub')).toContainText('12-hour (L) shifts');
+    await expect(page.locator('#shGantt')).toContainText(' L');
+    await page.locator('#shDay button[data-v="0"]').click();
+    await expect(page.locator('#shSub')).toContainText('1-hour lunch');
+  });
+
   test('the shift schedule shows the optimised rota', async ({ page }) => {
     await open(page);
     await settled(page);

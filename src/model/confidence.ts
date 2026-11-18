@@ -2,7 +2,7 @@ import type { Channel, Config, Rec } from './types';
 import { CH } from './defaults';
 import { type Ctx, makeCtx } from './ctx';
 import { getTeams, isOpenIv, weekdayOpen, weekendOpen, coverOK } from './demand';
-import { coverage } from './shifts';
+import { coverage, longLen, longOn } from './shifts';
 import { computePlans, computeRec, sizing } from './plan';
 import { runMC } from './montecarlo';
 import { clamp } from './util';
@@ -26,16 +26,16 @@ export function confTarget(S: Config): number {
   return clamp((+S.conf || 99) / 100, 0.5, 1);
 }
 
-/** Enough agents to have someone on seat through the opening hours at all. */
-export function coverMin(ctx: Ctx): number {
+/** Enough agents to have someone on seat through the opening hours at all (long weekend shifts cover more each). */
+export function coverMin(ctx: Ctx, k: 'wd' | 'we' = 'wd'): number {
   let n = 0;
   for (let i = 0; i < 48; i++) if (isOpenIv(ctx, i)) n++;
-  return Math.max(1, Math.ceil(n / 16));
+  return Math.max(1, Math.ceil(n / (k === 'we' && longOn(ctx, 5) ? longLen(ctx) : 16)));
 }
 /** The confidence search never goes below 80% of the forecast roster, nor below the minimum-staffing roster. */
 export function slotFloor(ctx: Ctx, base: Rec, minh: Rec, id: string, k: 'wd' | 'we'): number {
   const b = (base[id] && base[id][k]) || 0;
-  return b ? Math.max(coverMin(ctx), Math.ceil(b * 0.8), (minh[id] && minh[id][k]) || 0) : 0;
+  return b ? Math.max(coverMin(ctx, k), Math.ceil(b * 0.8), (minh[id] && minh[id][k]) || 0) : 0;
 }
 export function scaleRec(ctx: Ctx, base: Rec, minh: Rec, f: number): Rec {
   const o: Rec = {};

@@ -1,7 +1,7 @@
 // The floor: an isometric room drawn on a canvas, with agents who walk to their desks, take breaks and work contacts.
 // It reads the live day from the engine and draws it; clicking an agent opens the popover (ui.pop).
 import { clamp, lerp, mulberry, hashStr } from '../model';
-import { S, live, liveRes, simMin, simSec, ui, getTeams, deskCount, shS, shPT, shMins, shLabel, incidentOn } from './engine.svelte.js';
+import { S, live, liveRes, simMin, simSec, ui, getTeams, deskCount, shS, shKind, shMins, shDesc, incidentOn } from './engine.svelte.js';
 import { hhmm } from './format.js';
 
 /* ============ personas ============ */
@@ -57,7 +57,7 @@ export function planState(a,m){
   if(live.sick.has(a.key))return 'sick';
   const x=agentStart(a);if(x==null)return 'rest';
   const off=((m-shS(x)*30)%1440+1440)%1440;
-  if(shPT(x))return off<shMins(x)?'work':'off';
+  if(shKind(x))return off<shMins(x)?'work':'off';
   return off<240?'work':off<300?'lunch':off<540?'work':'off';
 }
 function pathFor(a,inward,door){const d=L.doors[door],s=a.desk.seat,cx=0.85,ay=a.desk.aisle;
@@ -87,7 +87,7 @@ export function updateAgents(dt){
       a.phase=(a.phase||0)+dt*11;
       if(w.seg>=w.pts.length-1){a.loc=w.inward?'seated':'away';a.walk=null;if(w.inward){a.actUntil=0;if(a.lastDoor==='wc')a.lastDoor=null}}}
     if(a.loc==='seated'){
-      if(st==='work'&&!onBreak){const x=agentStart(a),off=((m-shS(x)*30)%1440+1440)%1440,len=shMins(x),edge=off<20||off>len-25||(!shPT(x)&&off>220&&off<320);
+      if(st==='work'&&!onBreak){const x=agentStart(a),off=((m-shS(x)*30)%1440+1440)%1440,len=shMins(x),edge=off<20||off>len-25||(!shKind(x)&&off>220&&off<320);
         if(!edge&&Math.random()<dt*speed/60/160)a.breakUntil=m+4+Math.random()*6}
       if(simS>=a.actUntil||a.actUntil-simS>4000)chooseAct(a,simS);
     }
@@ -506,7 +506,7 @@ export function resetCam(){CAM={z:1,x:0,y:0};clampCam();closePop()}
 function showPop(d,px,py){
   const a=AG.get(d.key),st=planState(a,simMin()),x0=agentStart(a),s0=x0==null?0:shS(x0)*30;
   const desc={work:a.loc==='seated'?({voice:'On a call',chat:'Handling chats',email:'Working on emails',ticket:'Working on self-service tickets',idle:'Ready for the next contact'}[a.act]):(a.breakUntil>simMin()?'On a short break':'Walking to their desk'),lunch:'On lunch',off:'Not on shift right now',sick:'Off sick today',leave:'On annual leave today',rest:'Rest day (works 5 days in 7)'}[st];
-  const shift=st==='rest'?'Not rostered today':(st==='sick'||st==='leave')?'Shift uncovered':(shPT(x0)?`Part-time shift ${shLabel(x0)}`:`Shift ${hhmm(s0)}–${hhmm(s0+540)}, lunch ${hhmm(s0+240)}–${hhmm(s0+300)}`);
+  const shift=st==='rest'?'Not rostered today':(st==='sick'||st==='leave')?'Shift uncovered':shDesc(x0);
   ui.pop={key:a.key,name:a.p.name,team:a.team.label,desc,shift,st,left:clamp(px+12,8,floorEl.clientWidth-240),top:clamp(py-20,8,floorEl.clientHeight-150)};
 }
 export function closePop(){ui.pop=null;selectedKey=null}

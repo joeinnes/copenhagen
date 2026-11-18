@@ -92,3 +92,35 @@ describe('sizing', () => {
     expect(s.tot.fte).toBeCloseTo(s.tot.days / 5, 10);
   });
 });
+
+describe('long weekend shifts', () => {
+  // A tiny round-the-clock desk: the minimum-staffing rule (2 on seat, cover through leave and lunches) sets the roster.
+  const tiny = (weLong: boolean) => {
+    const S = defaults();
+    for (const c of ['voice', 'chat', 'email', 'ticket'] as const) S.ch[c].vol = 70;
+    S.langs[1].on = false; S.weLong = weLong;
+    return makeCtx(S);
+  };
+  it('two 12-hour weekend shifts and two 8-hour weekdays make one FTE', () => {
+    const ctx = tiny(true), id = getTeams(ctx)[0].id;
+    // 1 agent each weekend day (2 × 12h) plus 1 agent on 2 of the 5 weekdays (2 × 8h): spread as 0.4 a weekday
+    expect(sizing(ctx, { [id]: { wd: 0.4, we: 1 } }).tot.fte).toBeCloseTo(1, 9);
+  });
+  it('weekend plans use only long shifts, weekdays stay 9-hour', () => {
+    const ctx = tiny(true), r = computeRec(ctx), plan = computePlans(ctx, r.rec), id = getTeams(ctx)[0].id;
+    expect(plan[5][id].every((x) => x >= 200)).toBe(true);
+    expect(plan[0][id].every((x) => x < 100)).toBe(true);
+  });
+  it('cover 24 hours at the weekend with fewer people and fewer FTE', () => {
+    const off = tiny(false), on = tiny(true), id = getTeams(on)[0].id;
+    const rOff = computeRec(off).rec[id], rOn = computeRec(on).rec[id];
+    expect(rOn.we).toBeLessThan(rOff.we);
+    expect(rOn.wd).toBe(rOff.wd);
+    expect(sizing(on, computeRec(on).rec).tot.fte).toBeLessThan(sizing(off, computeRec(off).rec).tot.fte);
+  });
+  it('still meets minimum cover through the weekend', () => {
+    const ctx = tiny(true), r = computeRec(ctx), plan = computePlans(ctx, r.rec), id = getTeams(ctx)[0].id;
+    const cov = coverage(ctx, plan[6][id]).on;
+    expect(Math.min(...cov)).toBeGreaterThanOrEqual(2);
+  });
+});

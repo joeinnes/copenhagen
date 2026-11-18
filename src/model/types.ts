@@ -47,6 +47,9 @@ export interface Config {
   ptOn: boolean;
   ptHours: number;
   ptShare: number;
+  /** Full-time agents work long shifts (weLongHours) at weekends instead of 9-hour ones. */
+  weLong?: boolean;
+  weLongHours?: number;
   shared: boolean;
   clients: number;
   confOn: boolean;

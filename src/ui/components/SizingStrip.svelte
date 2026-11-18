@@ -5,7 +5,7 @@
   const d = $derived.by(() => {
     ui.rev; ui.sizing;
     const need = sizing(REC), have = sizing(S.hc), share = clientShare(), shared = S.shared && share < 0.999;
-    return { need, have, gap: have.tot.contract - need.tot.contract, shared, k: ghostK(), away: pct(1 - attend(), 1), autoSize: S.autoSize,
+    return { need, have, weLong: !!S.weLong, gap: have.tot.contract - need.tot.contract, shared, k: ghostK(), away: pct(1 - attend(), 1), autoSize: S.autoSize,
       headN: shared ? (need.tot.contract * share).toFixed(1) : need.tot.contract, both: need.nWD && need.nWE, warn: [...REC_WARN],
       conf: S.confOn ? { busy: CONF.busy, p: CONF.p, aim: confAimTxt(), unit: confPeriodNow() === 'week' ? 'weeks' : 'months', pctAim: pctAim() } : null };
   });
@@ -17,7 +17,8 @@
   <div class="facts">
     <div class="fact"><b>{d.both ? `${t.wd} / ${t.we}` : d.need.nWD ? t.wd : t.we}</b><span>rostered per day{d.both ? ', weekdays / weekends' : ''}</span></div>
     <div class="fact"><b>~{d.need.nWD ? Math.round(t.inWd) : Math.round(t.inWe)}{d.both ? ' / ~' + Math.round(t.inWe) : ''}</b><span>typically in, after {d.away} leave and sickness</span></div>
-    <div class="fact"><b>{fmtN(t.days)}</b><span>agent-days a week, 5 days each{t.ptw + t.pte ? `, ${t.ptw}${d.need.nWE ? ' / ' + t.pte : ''} part-time` : ''}</span></div>
+    {#if d.weLong}<div class="fact"><b>{fmtN(t.hours)}</b><span>paid hours a week, 40 per FTE, long shifts at weekends</span></div>
+    {:else}<div class="fact"><b>{fmtN(t.days)}</b><span>agent-days a week, 5 days each{t.ptw + t.pte ? `, ${t.ptw}${d.need.nWE ? ' / ' + t.pte : ''} part-time` : ''}</span></div>{/if}
     {#if d.shared}<div class="fact"><b>{t.contract}</b><span>FTE in the pool shared by {d.k} clients</span></div>{/if}
     {#if d.conf?.busy}<div class="fact"><b>…</b><span>finding the roster for {d.conf.aim}</span></div>
     {:else if d.conf && d.conf.p != null}<div class="fact"><b>{(d.conf.p * 100).toFixed(1)}%</b><span>of simulated {d.conf.unit} hit every target (aim {d.conf.pctAim}, {d.conf.aim})</span></div>{/if}

@@ -49,14 +49,16 @@ export const isOpenIv=i=>M.isOpenIv(C(),i), activeLangs=()=>M.activeLangs(C()), 
 export const getTeams=()=>M.getTeams(C()), ghostK=()=>M.ghostK(C()), clientShare=()=>M.clientShare(C());
 export const attend=()=>M.attend(C()), minSeat=()=>M.minSeat(C()), teamReq=(t,d)=>M.teamReq(C(),t,d);
 export const weekendOpen=()=>M.weekendOpen(C()), weekdayOpen=()=>M.weekdayOpen(C());
-export const shS=M.shS, shPT=M.shPT, ptLen=()=>M.ptLen(C()), shMins=x=>M.shMins(C(),x);
+export const shS=M.shS, shPT=M.shPT, shLong=M.shLong, shKind=M.shKind, ptLen=()=>M.ptLen(C()), shMins=x=>M.shMins(C(),x);
 const allowedStarts=M.allowedStarts, optimise=(req,types,fixed,al)=>M.optimise(C(),req,types,fixed,al);
 export const coverage=(starts,skip)=>M.coverage(C(),starts,skip);
 const evalDay=(d,mult,sched,boost,att)=>M.evalDay(C(),d,mult,sched,boost,att), summarise=res=>M.summarise(C(),res);
 export const rosterSize=(id,d)=>M.rosterSize(C(),S.hc,id,d), deskCount=id=>M.deskCount(C(),S.hc,id);
 export const sizing=hc=>M.sizing(C(),hc);
 export const confTarget=()=>M.confTarget(S), confPeriodNow=()=>M.confPeriodNow(S);
-export function shSegs(x){const s0=shS(x)*30;return shPT(x)?[[s0,s0+ptLen()*30,0]]:[[s0,s0+240,0],[s0+240,s0+300,1],[s0+300,s0+540,0]]}
+export function shSegs(x){const s0=shS(x)*30;return shKind(x)?[[s0,s0+shMins(x),0]]:[[s0,s0+240,0],[s0+240,s0+300,1],[s0+300,s0+540,0]]}
+/** How a shift reads in a tooltip or popover: "Shift 08:00–17:00, lunch 12:00–13:00", "Part-time shift 10:00–14:00", "12-hour shift 08:00–20:00". */
+export function shDesc(x){const s0=shS(x)*30;return shPT(x)?`Part-time shift ${shLabel(x)}`:shLong(x)?`${shMins(x)/60}-hour shift ${shLabel(x)}`:`Shift ${hhmm(s0)}–${hhmm(s0+540)}, lunch ${hhmm(s0+240)}–${hhmm(s0+300)}`}
 export function shLabel(x){const s0=shS(x)*30;return `${hhmm(s0)}–${hhmm(s0+shMins(x))}`}
 
 /* ============ plans & live day ============ */
@@ -84,8 +86,8 @@ function replan(){
     st.forEach((x,k)=>{if(sk.has(k))return;(shS(x)<=now?fixed:mov).push(k)});
     if(!mov.length||!al.length)continue;
     const fc=coverage(fixed.map(k=>st[k])).on;
-    const ns=optimise(teamReq(t,live.dow),mov.map(k=>shPT(st[k])?1:0),fc,al),byType=[ns.filter(x=>!shPT(x)),ns.filter(shPT)];
-    mov.forEach(k=>{st[k]=byType[shPT(st[k])?1:0].shift()});
+    const ns=optimise(teamReq(t,live.dow),mov.map(k=>shKind(st[k])),fc,al),byType=[0,1,2].map(kd=>ns.filter(x=>shKind(x)===kd));
+    mov.forEach(k=>{st[k]=byType[shKind(st[k])].shift()});
   }
   live.replanned=true;
 }

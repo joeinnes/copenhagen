@@ -2,7 +2,7 @@ import type { Plan, Rec, Sched, Team } from './types';
 import { CH, DEFER } from './defaults';
 import { type Ctx } from './ctx';
 import { attend, coverOK, dayVol, getTeams, isOpenIv, isWE, minPpl, minSeat, teamReq, weekdayOpen, weekendOpen } from './demand';
-import { allowedStarts, coverage, optimise, ptCount, ptLen } from './shifts';
+import { allowedStarts, coverage, longLen, longOn, optimise, ptCount, ptLen } from './shifts';
 import { evalTeamDay, summarise } from './evaluate';
 
 /** Agents rostered for a team on a day (weekday or weekend headcount), zero if the desk is closed. */
@@ -26,7 +26,7 @@ export function computePlans(ctx: Ctx, hc: Rec): Plan {
     plan[d] = {};
     for (const t of getTeams(ctx)) {
       const H = rosterSize(ctx, hc, t.id, d), k = `${t.id}|${d}|${H}`;
-      if (!ctx.planMemo.has(k)) ctx.planMemo.set(k, optimise(ctx, teamReq(ctx, t, d), H, null, al));
+      if (!ctx.planMemo.has(k)) ctx.planMemo.set(k, optimise(ctx, teamReq(ctx, t, d), H, null, al, d));
       plan[d][t.id] = ctx.planMemo.get(k)!.slice();
     }
   }
@@ -55,7 +55,7 @@ export function suggestDay(ctx: Ctx, team: Team, bd: number | null, warn?: Set<s
   const S = ctx.S, E = S.ch, req = teamReq(ctx, team, bd), al = allowedStarts();
   const ok = (H: number) => {
     if (H < minPpl(ctx)) return false;
-    const cov = coverage(ctx, optimise(ctx, req, H, null, al)).on;
+    const cov = coverage(ctx, optimise(ctx, req, H, null, al, bd)).on;
     if (!coverOK(ctx, team, bd, cov)) return false;
     const r = evalTeamDay(ctx, team, bd, 1, cov, null, null, attend(ctx));
     const s = summarise(ctx, { teams: { x: r } }).ch;
@@ -79,7 +79,7 @@ export function minCoverH(ctx: Ctx, team: Team, d: number | null): number {
   const f = minSeat(ctx), p = minPpl(ctx);
   if (!f && !p) return 0;
   const req = Array.from({ length: 48 }, (_, i) => (isOpenIv(ctx, i) ? f : 0)), al = allowedStarts();
-  for (let H = Math.max(1, p); H < 200; H++) if (coverOK(ctx, team, d, coverage(ctx, optimise(ctx, req, H, null, al)).on)) return H;
+  for (let H = Math.max(1, p); H < 200; H++) if (coverOK(ctx, team, d, coverage(ctx, optimise(ctx, req, H, null, al, d)).on)) return H;
   return 200;
 }
 
@@ -99,16 +99,20 @@ export function computeRec(ctx: Ctx): RecResult {
   return { rec, minh, warn: [...warn] };
 }
 
-/** Headcount and FTE for a roster: agent-days a week, part-timers counted by their hours, 5 days in 7. */
+/**
+ * Headcount and FTE for a roster. FTE is paid hours a week ÷ 40: a full-time shift pays 8 hours, a part-time shift its
+ * length, and a long weekend shift its length (two 12-hour weekend shifts plus two weekday shifts make 40).
+ */
 export function sizing(ctx: Ctx, hc: Rec) {
   const S = ctx.S, nWD = S.openDays.slice(0, 5).filter(Boolean).length, nWE = S.openDays.slice(5).filter(Boolean).length, at = attend(ctx);
-  const ph = S.ptOn ? ptLen(ctx) / 2 : 8, hrs = (H: number) => (H - ptCount(ctx, H)) * 8 + ptCount(ctx, H) * ph;
+  const ph = S.ptOn ? ptLen(ctx) / 2 : 8, weFt = longOn(ctx, 5) ? longLen(ctx) / 2 : 8;
+  const hrs = (H: number, ft = 8) => (H - ptCount(ctx, H)) * ft + ptCount(ctx, H) * ph;
   const rows = getTeams(ctx).map((t) => {
     const h = hc[t.id] || { wd: 0, we: 0 }, wd = nWD ? h.wd : 0, we = nWE ? h.we : 0, days = wd * nWD + we * nWE;
-    const ptw = nWD ? ptCount(ctx, wd) : 0, pte = nWE ? ptCount(ctx, we) : 0, fte = (hrs(wd) * nWD + hrs(we) * nWE) / 8 / 5;
-    return { t, wd, we, ptw, pte, days, fte, inWd: wd * at, inWe: we * at, contract: Math.ceil(fte - 1e-9) };
+    const ptw = nWD ? ptCount(ctx, wd) : 0, pte = nWE ? ptCount(ctx, we) : 0, hours = hrs(wd) * nWD + hrs(we, weFt) * nWE, fte = hours / 40;
+    return { t, wd, we, ptw, pte, days, hours, fte, inWd: wd * at, inWe: we * at, contract: Math.ceil(fte - 1e-9) };
   });
-  const tot = { wd: 0, we: 0, ptw: 0, pte: 0, days: 0, fte: 0, contract: 0, inWd: 0, inWe: 0 };
+  const tot = { wd: 0, we: 0, ptw: 0, pte: 0, days: 0, hours: 0, fte: 0, contract: 0, inWd: 0, inWe: 0 };
   rows.forEach((r) => { for (const k in tot) (tot as any)[k] += (r as any)[k]; });
   return { rows, tot, nWD, nWE };
 }
